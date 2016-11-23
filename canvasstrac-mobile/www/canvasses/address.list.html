@@ -1,0 +1,9 @@
+<ion-view view-title="Addresses">
+  <ion-content>
+    <ion-list>
+      <ion-item ng-repeat="addr in pager.pageItems" ng-class="{active: addr.isSelected}" ng-click="openPopover($event, addr)">
+        <div ng-include="'canvasses/address.element.html'"></div>
+      </ion-item>
+    <ion-list>
+  </ion-content>
+</ion-view>

@@ -1,0 +1,3 @@
+[submodule "canvasstrac-mobile/www/canvasstrac-client-common"]
+	path = canvasstrac-mobile/www/canvasstrac-client-common
+	url = https://github.com/ibuttimer/canvasstrac-client-common.git

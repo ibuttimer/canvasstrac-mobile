@@ -11,8 +11,8 @@ The development environment:
 
 ### Environment setup
 In an appropriate folder:
-* git clone https://github.com/ibuttimer/canvasstrac-mgmt.git
-* cd canvasstrac-mgmt
+* git clone https://github.com/ibuttimer/canvasstrac-mobile.git
+* cd canvasstrac-mobile
 * git submodule init
 * git submodule update
 * bower install

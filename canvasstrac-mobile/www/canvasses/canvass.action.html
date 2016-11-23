@@ -1,0 +1,39 @@
+﻿<ion-view view-title="Canvass">
+  <!-- NOTE form must be first child of view to be accessible as $scope.formName in the controller -->
+  <form name="quickResultForm" ng-submit="submitQuickResponse()">
+    <ion-content>
+      <div class="card">
+        <h4>Quick response</h4>
+        <ion-list>
+          <ion-radio ng-model="quickResult.qr" ng-value="'na'">Not Available</ion-radio>
+          <ion-radio ng-model="quickResult.qr" ng-value="'dc'">Don't Canvass Again</ion-radio>
+          <ion-radio ng-model="quickResult.qr" ng-value="'ta'">Try Again Later</ion-radio>
+        </ion-list>
+
+        <div>
+          <p class="text-center">
+            <!--          <span class="alignleft">{{supportMin}}</span>-->
+            Support ({{supportMin - supportOffset}}-{{supportMax - supportOffset}}): {{quickResult.support == supportUnknown ? 'Unknown' : (quickResult.support - supportOffset)}}
+    <!--
+              <span class="alignright">{{supportMax}}</span>-->
+          </p>
+          <div style="clear: both;"></div>
+        </div>
+        <div class="item range">
+          <i class="icon ion-thumbsdown"></i>
+          <input type="range" name="supporter" min="{{supportUnknown}}" max="{{supportMax}}" ng-model="quickResult.support">
+          <i class="icon ion-thumbsup"></i>
+        </div>
+        <div>
+          <p align="center">
+            <input type="submit" value="Submit" class="button button-positive" ng-disabled="!quickResult.qr && (quickResult.support == supportUnknown) && !result.answers">
+          </p>
+        </div>
+      </div>
+
+      <ion-item ng-click="surveyAddr()">
+        <div class="item item-icon-left"><i class="icon ion-android-chat"></i>Survey</div>
+      </ion-item>
+    </ion-content>
+  </form>
+</ion-view>

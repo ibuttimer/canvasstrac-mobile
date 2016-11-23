@@ -1,0 +1,66 @@
+﻿<ion-view view-title="Survey">
+  <!-- NOTE form must be first child of view to be accessible as $scope.formName in the controller 
+  <form name="surveyForm" ng-submit="submitSurveyResponse()"> -->
+  <form name="surveyForm">
+      <ion-content>
+        <div class="button-bar">
+          <a class="button icon icon-left ion-chevron-left" ng-disabled="!allowPrev" ng-click="moveQuestion(-1)">Previous</a>
+          <a class="button icon icon-right ion-chevron-right" ng-disabled="!allowNext" ng-click="moveQuestion(1)">Next</a>
+        </div>
+        <div class="card">
+          <div class="item item-text-wrap">
+            <h2>Question {{quesNum + 1}} of {{quesTotal}}</h2>
+          </div>
+        </div>
+        <div class="card">
+          <div class="item item-text-wrap">
+            <p>{{question.question}}</p>
+          </div>
+        </div>
+        <div class="card" ng-if="quesParam.showSingleSelOptions">
+          <ion-list>
+            <ion-radio ng-repeat="opt in question.options" ng-model="answer.sel" ng-value="opt" ng-click="answerIp()">{{opt}}</ion-radio>
+          </ion-list>
+        </div>
+        <div class="card" ng-if="quesParam.showMultiSelOptions">
+          <ion-list>
+            <ion-checkbox ng-repeat="opt in question.options" ng-model="answer[opt]" ng-click="answerIp()">{{opt}}</ion-checkbox>
+          </ion-list>
+        </div>
+        <div class="card" ng-if="quesParam.showRanking">
+          <div class="row">
+            <div class="col" ng-repeat="opt in question.options" ng-if="opt">{{opt}}</div>
+          </div>
+          <div class="item range">
+            <input type="range" name="ranking" min="{{question.rangeMin}}" max="{{question.rangeMax}}" ng-change="answerIp()" ng-model="answer.rank">
+          </div>
+        </div>
+        <div class="card" ng-if="quesParam.showTextInput">
+          <div class="row">
+            <div class="col">
+              <label class="item item-input text">
+                <textarea placeholder="Enter comment" rows="1" ng-model="answer.comment" ng-required="true" name="comment" ng-change="answerIp()"></textarea>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p align="center">
+            <input type="submit" value="Save" class="button button-positive" ng-disabled="!answeredAll" ng-click="submitSurveyResponse('save')">
+          </p>
+        </div>
+        <div ng-if="devmode">
+          <p align="center">
+            <input type="submit" value="Fake survey" class="button button-energized" ng-click="submitSurveyResponse('fake')">
+          </p>
+        </div>
+      </ion-content>
+    </form>
+  <!--<div>
+    <p align="center" ng-if="devmode">
+      <button class="button button-block button-warning" ng-click="fakeSurvey()">Fake survey</button>
+    </p>
+  </div>-->
+</ion-view>
+
