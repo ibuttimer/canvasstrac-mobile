@@ -8,13 +8,12 @@ The development environment:
 * bower v1.7.9
 * gulp v3.9.1
 * MongoDB v3.2.4
+* Visual Studio Community 2015 with Visual Studio Tools for Apache Cordova
 
 ### Environment setup
-In an appropriate folder:
-* git clone https://github.com/ibuttimer/canvasstrac-mobile.git
-* cd canvasstrac-mobile
-* git submodule init
-* git submodule update
-* bower install
+See [README.md](canvasstrac-mobile/README.md) for details.
+
+**NOTE:** In addition to the basic setup, it is necessary to add a localdev.json file. See [canvasstrac-mobile/config/readme.txt](canvasstrac-mobile/config/readme.txt) for details.
+
 
 

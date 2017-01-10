@@ -100,7 +100,7 @@ function loginFactory(authFactory, canvassFactory, surveyFactory, canvassResultF
 
     if (create) {
       // create objects
-      resList = factory.newList(id, options.title, storeFactory.CREATE_INIT);
+      resList = factory.newList(id, options);
       filter = storeFactory.newObj(filterId, factory.newFilter, storeFactory.CREATE_INIT);
       pager = pagerFactory.newPager(pagerId, [], 1, options.perPage, options.maxDispPage);
 

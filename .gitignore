@@ -242,3 +242,7 @@ ModelManifest.xml
 .fake/
 /canvasstrac-mobile/www/app.config.js
 /canvasstrac-mobile/config/localdev.json
+/canvasstrac-mobile/plugins
+/canvasstrac-mobile/platforms
+/canvasstrac-mobile/www/lib
+/canvasstrac-mobile/merges/windows/js
