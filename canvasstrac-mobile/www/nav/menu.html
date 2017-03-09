@@ -18,7 +18,8 @@
     </ion-header-bar>
     <ion-header-bar class="bar-subheader">
       <div ng-if="user.authenticated">
-        <h2 class="title">{{user.username}}</h2>
+        <p><h2 class="title">{{user.username}}</h2></p>
+        <p ng-if="showDevDbg">{{user.id}}</p>
       </div>
     </ion-header-bar>
       <ion-content class="has-subheader">
@@ -27,17 +28,25 @@
             <i class="icon ion-log-in"></i>
             Login
           </ion-item>
-          <ion-item menu-close class="item item-icon-left" ng-if="user.authenticated" href="#/app/home">
+          <ion-item menu-close class="item item-icon-left" ng-if="user.authenticated" href="{{homeUrl}}">
             <i class="icon ion-android-home"></i>
             Home
           </ion-item>
-          <ion-item menu-close class="item item-icon-left" ng-if="user.authenticated" href="#/app/addresses">
+          <ion-item menu-close class="item item-icon-left" ng-if="user.authenticated" href="{{canvassesUrl}}">
+            <i class="icon ion-android-clipboard"></i>
+            Canvasses
+          </ion-item>
+          <ion-item menu-close class="item item-icon-left" ng-if="showAddressItem" href="{{addressUrl}}">
             <i class="icon ion-android-list"></i>
             Addresses
           </ion-item>
           <ion-item menu-close log-out class="item item-icon-left" ng-if="user.authenticated">
             <i class="icon ion-log-out"></i>
             Logout
+          </ion-item>
+          <ion-item menu-close dev-dbg class="item item-icon-left" ng-if="devmode">
+            <i class="icon ion-bug"></i>
+            {{devDbgAction}}
           </ion-item>
         </ion-list>
       </ion-content>

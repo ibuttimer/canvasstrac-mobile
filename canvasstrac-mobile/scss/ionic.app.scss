@@ -76,3 +76,12 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 .alignright {
 	float: right;
 }
+
+.canvass-element-table {
+  table {
+    table-layout: auto;
+  }
+  td {
+    word-wrap: break-word
+  }
+}

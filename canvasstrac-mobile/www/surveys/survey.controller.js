@@ -76,7 +76,7 @@ function SurveyController($scope, $stateParams, $state, $ionicHistory, canvassFa
         $scope.answers[$scope.quesNum] = $scope.answer;
       }
 
-      $scope.question = $scope[RES.ACTIVE_SURVEY].questions[num];
+      $scope.question = $scope[RES.SURVEY_QUESTIONS].getFromList(num);
       $scope.quesParam = getQuestionParam($scope.question.type);
       $scope.quesNum = num;
 
@@ -140,7 +140,7 @@ function SurveyController($scope, $stateParams, $state, $ionicHistory, canvassFa
 
     result.answers = [];
     for (var i = 0; i < $scope.quesTotal; ++i) {
-      var question = $scope[RES.ACTIVE_SURVEY].questions[i],
+      var question = $scope[RES.SURVEY_QUESTIONS].getFromList(i),
         quesParam = getQuestionParam(question.type),
         answer = $scope.answers[i],
         saveStr = '';
@@ -182,7 +182,7 @@ function SurveyController($scope, $stateParams, $state, $ionicHistory, canvassFa
 
   function fakeSurvey() {
     for (var i = 0; i < $scope.quesTotal; ++i) {
-      var question = $scope[RES.ACTIVE_SURVEY].questions[i],
+      var question = $scope[RES.SURVEY_QUESTIONS].getFromList(i),
         quesParam = getQuestionParam(question.type),
         answer = $scope.answers[i];
 

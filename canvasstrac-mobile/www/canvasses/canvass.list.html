@@ -1,0 +1,12 @@
+<ion-view view-title="Canvasses">
+  <ion-content>
+    <ion-item>
+      Please select a canvass to proceed.
+    </ion-item>
+    <ion-list>
+      <ion-item ng-repeat="canvass in pager.pageItems" ng-class="{active: canvass.isSelected}" ng-click="setCanvass(canvass)">
+        <div ng-include="'canvasses/canvass.element.html'"></div>
+      </ion-item>
+    <ion-list>
+  </ion-content>
+</ion-view>

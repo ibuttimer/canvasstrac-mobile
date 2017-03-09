@@ -39,18 +39,48 @@ function HomeController($scope, $ionicModal, $ionicPopover, $timeout, $state, $i
   });
 
 
-  $scope[RES.ALLOCATED_ADDR].addOnChange(chartData);
-
   $scope.chartLabels = ["Completed", "Pending"];
-  $scope.completed = 0;
-  $scope.pending = 0;
-  //$scope.chartData = [$scope.completed, $scope.pending];
+  $scope.overallData = [0, 0];
+  $scope.myData = [0, 0];
+  $scope.assignmentCnt = 0;
   $scope.chartOptions = {
     legend: {
       display: true
     }
   };
 
+  // just watch the list rather than the whole ResourceList object
+  $scope.$watch('assignedAddr.list', function (newValue, oldValue, scope) {
+    var completed = 0,
+      pending = 0,
+      myCompleted = 0,
+      myPending = 0,
+      assignmentCnt = 0;
+    newValue.forEach(function (entry) {
+      if (entry.canvassResult) {
+        ++completed;
+      } else {
+        ++pending;
+      }
+      if (entry.canvasser === USER.id) {
+        ++assignmentCnt;
+        if (entry.canvassResult) {
+          ++myCompleted;
+        } else {
+          ++myPending;
+        }
+      }
+    });
+    scope.overallData = [completed, pending];
+    scope.myData = [myCompleted, myPending];
+    scope.assignmentCnt = assignmentCnt;
+  }, true);
+
+  // watch for active canvass changes
+  $scope.showCanvassDetails = false;
+  $scope.$watch('activeCanvass._id', function (newValue, oldValue, scope) {
+    scope.showCanvassDetails = (newValue ? true : false);
+  }, true);
 
   $scope.errormessage = '';
 
@@ -80,16 +110,31 @@ function HomeController($scope, $ionicModal, $ionicPopover, $timeout, $state, $i
 
   function chartData(resList) {
     var completed = 0,
-      pending = 0;
+      pending = 0,
+      myCompleted = 0,
+      myPending = 0,
+      assignmentCnt = 0;
     resList.forEachInList(function (entry) {
+
+      console.log(entry);
+
       if (entry.canvassResult) {
         ++completed;
       } else {
         ++pending;
       }
+      if (entry.canvasser === USER.id) {
+        ++assignmentCnt;
+        if (entry.canvassResult) {
+          ++myCompleted;
+        } else {
+          ++myPending;
+        }
+      }
     });
-    $scope.completed = completed;
-    $scope.pending = pending;
+    $scope.overallData = [completed, pending];
+    $scope.myData = [myCompleted, myPending];
+    $scope.assignmentCnt = assignmentCnt;
   }
 
   function toggleLeftSideMenu () {

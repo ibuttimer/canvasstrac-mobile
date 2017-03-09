@@ -44,6 +44,16 @@ angular.module('canvassTrac', ['ionic', 'ct.config', 'ct.clientCommon', 'ngCordo
       }
     })
 
+    .state(STATES.CANVASSLIST, {
+      url: canvassPath,
+      views: {
+        'menuContent': {
+          templateUrl: 'canvasses/canvass.list.html',
+          controller: 'CanvassListController'
+        }
+      }
+    })
+
     .state(STATES.ADDRESSLIST, {
       url: addressesPath,
       views: {

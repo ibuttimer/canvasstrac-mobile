@@ -17,19 +17,26 @@
           <h2>Welcome {{user.person.firstname}}</h2>
         </div>
       </div>
-      <div class="card">
-        <div class="item item-text-wrap">
-          <h2>Election: {{activeElection.name}}</h2>
-          <h2>Survey: {{activeSurvey.name}}</h2>
-          <h3>Assignment: {{getAssignedText(allocatedAddr.count)}}</h3>
+      <div ng-if="showCanvassDetails">
+        <div class="card">
+          <div class="item item-text-wrap">
+            <h2>Election: {{activeElection.name}}</h2>
+            <h2>Survey: {{activeSurvey.name}}</h2>
+            <h3>Your Assignment: {{getAssignedText(assignmentCnt)}}</h3>
+          </div>
+
+          <canvas id="pie" class="chart chart-pie"
+                  chart-data="myData" chart-labels="chartLabels" chart-options="chartOptions"></canvas>
         </div>
+        <div class="card">
+          <div class="item item-text-wrap">
+            <h3>Canvass Total Assignment: {{getAssignedText(assignedAddr.count)}}</h3>
+          </div>
 
-        <canvas id="pie" class="chart chart-pie"
-          chart-data="[completed, pending]" chart-labels="chartLabels" chart-options="chartOptions">
-
-        </canvas> 
+          <canvas id="pie" class="chart chart-pie"
+                  chart-data="overallData" chart-labels="chartLabels" chart-options="chartOptions"></canvas>
+        </div>
       </div>
-      
     </div>
   </ion-content>
 </ion-view>

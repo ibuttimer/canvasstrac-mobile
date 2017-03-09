@@ -1,0 +1,41 @@
+<div class="item">
+  <table class="canvass-element-table">
+    <tr>
+      <td><h2>Canvass:</h2></td>
+      <td><h2>{{canvass.name}}</h2></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>{{canvass.description}}</td>
+    </tr>
+    <tr ng-if="showDevDbg">
+      <td></td>
+      <td>{{canvass._id}}</td>
+    </tr>
+    <tr>
+      <td><h2>Election:</h2></td>
+      <td><h2>{{canvass.election.name}}</h2></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>{{canvass.election.description}}</td>
+    </tr>
+    <tr ng-if="showDevDbg">
+      <td></td>
+      <td>{{canvass.election._id}}</td>
+    </tr>
+    <tr>
+      <td><h2>Survey:</h2></td>
+      <td><h2>{{canvass.survey.name}}</h2></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>{{canvass.survey.description}}</td>
+    </tr>
+    <tr ng-if="showDevDbg">
+      <td></td>
+      <td>{{canvass.survey._id}}</td>
+    </tr>
+  </table>
+</div>
+  

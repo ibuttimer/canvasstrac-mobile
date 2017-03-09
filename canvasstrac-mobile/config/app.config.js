@@ -9,6 +9,7 @@ angular.module('ct.config', [])
       APP: 'app',
       HOME: 'app.home',
       LOGIN: 'app.login',
+      CANVASSLIST: 'app.canvasses',
       ADDRESSLIST: 'app.addresses',
       CANVASS: 'app.canvass',
       SURVEY: 'app.survey',
@@ -25,15 +26,15 @@ angular.module('ct.config', [])
   .constant('DBG', (function () {
     return {
       // debug enable flags
-      storeFactory: false,
-      localStorage: false,
-      surveyFactory: true,
-      canvassFactory: true,
-      electionFactory: true,
-      CanvassController: true,
-      CanvassActionController: true,
-      SurveyController: true,
-      navService: true,
+      storeFactory: @@storeFactory,
+      localStorage: @@localStorage,
+      surveyFactory: @@surveyFactory,
+      canvassFactory: @@canvassFactory,
+      electionFactory: @@electionFactory,
+      CanvassController: @@CanvassController,
+      CanvassActionController: @@CanvassActionController,
+      SurveyController: @@SurveyController,
+      navService: @@navService,
 
       isEnabled: function (mod) {
         return this[mod];
@@ -67,10 +68,16 @@ angular.module('ct.config', [])
   })())
   .constant('RES', (function () {
     return {
+      CANVASS_LIST: 'canvassList',                // canvass list name
       ACTIVE_CANVASS: 'activeCanvass',            // canvass object name
       ACTIVE_SURVEY: 'activeSurvey',              // survey object name
       ACTIVE_ELECTION: 'activeElection',          // election object name
+      //BACKUP_CANVASS: 'backupCanvass',            // backup canvass object name
+      //BACKUP_SURVEY: 'backupSurvey',              // backup survey object name
+      //BACKUP_ELECTION: 'backupElection',          // backup election object name
       CANVASS_RESULT:  'canvassResults',          // canvass results object name
+      SURVEY_QUESTIONS: 'surveyQuestions',        // survey questions object name
+
       ASSIGNED_ADDR: 'assignedAddr',              // all addresses assigned to canvass
       //UNASSIGNED_ADDR: 'unassignedAddr',          // addresses not assigned to canvass
       ASSIGNED_CANVASSER: 'assignedCanvasser',    // all canvassers assigned to canvass

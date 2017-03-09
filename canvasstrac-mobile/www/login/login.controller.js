@@ -15,15 +15,27 @@ angular.module('canvassTrac')
     }
   })
 
-  .directive('logOut', function() {
+  .directive('logOut', function () {
     return {
-      link: function($scope, element) {
-        element.on('click', function() {
+      link: function ($scope, element) {
+        element.on('click', function () {
           $scope.doLogout();
         });
       }
     }
   })
+
+  .directive('devDbg', function () {
+    return {
+      link: function ($scope, element) {
+        element.on('click', function () {
+          $scope.doDevDbg();
+        });
+      }
+    }
+  })
+
+  .value('SHOWDEVDBG', false)
 
   .controller('RegisterController', function RegisterController($scope, /*ngDialog,*/ authFactory) {
 
@@ -51,9 +63,9 @@ angular.module('canvassTrac')
 */
 
 LoginController.$inject = ['$scope', '$ionicModal', '$timeout', '$state', 'authFactory', 'canvassFactory',
-  'userFactory', 'addressFactory', 'storeFactory', 'loginFactory', 'STATES', 'RES', 'USER', 'CONFIG'];
+  'userFactory', 'addressFactory', 'storeFactory', 'loginFactory', 'STATES', 'RES', 'USER', 'CONFIG', 'SHOWDEVDBG'];
 function LoginController($scope, $ionicModal, $timeout, $state, authFactory, canvassFactory,
-  userFactory, addressFactory, storeFactory, loginFactory, STATES, RES, USER, CONFIG) {
+  userFactory, addressFactory, storeFactory, loginFactory, STATES, RES, USER, CONFIG, SHOWDEVDBG) {
 
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
@@ -69,21 +81,34 @@ function LoginController($scope, $ionicModal, $timeout, $state, authFactory, can
   $scope.devmode = CONFIG.DEV_MODE;
   if (CONFIG.DEV_MODE) {
     $scope.devCredentials = devCredentials;
+    $scope.doDevDbg = doDevDbg;
+    doDevDbg(true);
   }
 
   $scope.errormessage = '';
-  loginFactory.setUp();
 
-  $scope.devmode = CONFIG.DEV_MODE;
+  // setup & config are seperate steps. @see loginFactory.setUp() for details
+  loginFactory.setUp();
+  loginFactory.config({
+    scope: $scope,
+    ids: [RES.ACTIVE_CANVASS]
+  });
+
+  $scope.homeUrl = $state.href(STATES.HOME);
+  $scope.canvassesUrl = $state.href(STATES.CANVASSLIST);
+  $scope.addressUrl = $state.href(STATES.ADDRESSLIST);
+
+  $scope.showAddressItem = false;
+  // watch for active canvass changes
+  $scope.$watch('activeCanvass._id', function (newValue, oldValue, scope) {
+    scope.showAddressItem = scope.user.authenticated && newValue;
+  }, true);
 
   // Bindable Members Up Top, https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#style-y033
   $scope.doLogin = doLogin;
   $scope.doLogout = doLogout;
   $scope.closeLogin = closeLogin;
   $scope.login = login;
-  if (CONFIG.DEV_MODE) {
-    $scope.devCredentials = devCredentials;
-  }
 
   // Create the login modal that we will use later
   $ionicModal.fromTemplateUrl('login/login.html', {
@@ -117,20 +142,29 @@ function LoginController($scope, $ionicModal, $timeout, $state, authFactory, can
           function () {                   // onSuccess
 
             // request the canvass addresses assigned to the user
-            loginFactory.requestAssignment(USER.id,
+            loginFactory.requestCanvasses(USER.id,
               authFactory.isAuthenticated,    // queryProcess
               function () {                   // onSuccess
-                //var canvass = canvassFactory.getObj(RES.ACTIVE_CANVASS);
-                
-                //loginFactory.requestCompletedAssignments(canvass._id, USER.id,
-                //  authFactory.isAuthenticated,    // queryProcess
-                //  function () {                   // onSuccess
-                //    var list = addressFactory.getList(RES.ALLOCATED_ADDR);
-                //    console.debug('assignment rsp read:', list);
-                //  },
-                //  function () {                   // onFailure
-                //    // TODO display error
-                //  });
+                var canvassesList = canvassFactory.getObj(RES.CANVASS_LIST);
+
+                switch (canvassesList.count) {
+                  case 0:
+                    $state.go(STATES.HOME);
+                    break;
+                  case 1:
+                    loginFactory.requestAssignment(USER.id, canvassesList.getFromList(0)._id,
+                      authFactory.isAuthenticated,    // queryProcess
+                      function () {                   // onSuccess
+                        $state.go(STATES.HOME);
+                      },
+                      function () {                   // onFailure
+                        // TODO display error
+                      });
+                    break;
+                  default:
+                    $state.go(STATES.CANVASSLIST);
+                    break;
+                }
               },
               function () {                   // onFailure
                 // TODO display error
@@ -177,7 +211,20 @@ function LoginController($scope, $ionicModal, $timeout, $state, authFactory, can
     $state.go(STATES.HOME);   // go to home screen
   }
 
-  
+  // Perform the dev debug action
+  function doDevDbg(set) {
+    if (set !== undefined) {
+      SHOWDEVDBG = set; // set value
+    } else {
+      SHOWDEVDBG = !SHOWDEVDBG; // toggle value
+    }
+    $scope.showDevDbg = SHOWDEVDBG;
+    if (SHOWDEVDBG) {
+      $scope.devDbgAction = 'Hide Debug';
+    } else {
+      $scope.devDbgAction = 'Show Debug';
+    }
+  }
 
   // Quick hack for dev mode to enter user credentials
   function devCredentials() {
@@ -185,7 +232,6 @@ function LoginController($scope, $ionicModal, $timeout, $state, authFactory, can
     $scope.loginData.username = CONFIG.DEV_USER;
     $scope.loginData.password = CONFIG.DEV_PASSWORD;
   }
-
 
   function getUser() {
 
