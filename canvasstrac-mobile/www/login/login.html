@@ -6,27 +6,42 @@
     </div>
   </ion-header-bar>
   <ion-content>
-    <form ng-submit="doLogin()">
-      <div ng-if="errormessage" style="color:#000000;" class="error-box">
-        <p align="center">{{errormessage}}</p>
-      </div>
+    <form name="loginForm" ng-submit="doLogin($event)">
+      <div ng-include="'login/login.progress.html'"></div>
       <div class="list">
         <label class="item item-input">
           <span class="input-label">Username</span>
-          <input type="text" ng-model="loginData.username">
+          <input type="text" ng-disabled="inprogress.active" ng-model="loginData.username" ng-change="loginPossible()" >
         </label>
         <label class="item item-input">
           <span class="input-label">Password</span>
-          <input type="password" ng-model="loginData.password">
+          <input type="password" ng-disabled="inprogress.active" ng-model="loginData.password" ng-change="loginPossible()" >
         </label>
-        <ion-checkbox ng-model="loginData.rememberMe" ng-checked="loginData.rememberMe">Remember me</ion-checkbox>
-        <label class="item">
-          <button class="button button-block button-positive" type="submit">Log in</button>
-        </label>
+        <ion-checkbox ng-model="loginData.rememberMe" ng-disabled="inprogress.active" ng-checked="loginData.rememberMe">
+          Remember me
+        </ion-checkbox>
+        <div class="row">
+          <div class="col">
+            <label class="item">
+              <button class="button button-block button-assertive" ng-disabled="inprogress.active" ng-click="closeLogin()" type="reset">Cancel</button>
+            </label>
+          </div>
+          <div class="col">
+            <label class="item">
+              <button class="button button-block button-positive" ng-disabled="!loginEnabled" type="submit">Log in</button>
+            </label>
+          </div>
+        </div>
 
         <!-- Quick hack for dev mode to enter user credentials-->
-        <label class="item" ng-if="devmode">
-          <button class="button button-block button-energized" ng-click="devCredentials()">Dev credentials</button>
+        <label class="item" ng-if="devUser1">
+          <button class="button button-block button-energized" ng-disabled="inprogress.active" ng-click="devCredentials(devUser1)">Dev {{devUser1}}</button>
+        </label>
+        <label class="item" ng-if="devUser2">
+          <button class="button button-block button-energized" ng-disabled="inprogress.active" ng-click="devCredentials(devUser2)">Dev {{devUser2}}</button>
+        </label>
+        <label class="item" ng-if="devUser3">
+          <button class="button button-block button-energized" ng-disabled="inprogress.active" ng-click="devCredentials(devUser3)">Dev {{devUser3}}</button>
         </label>
       </div>
     </form>

@@ -24,15 +24,18 @@
           <input type="range" name="supporter" min="{{supportUnknown}}" max="{{supportMax}}" ng-model="quickResult.support">
           <i class="icon ion-thumbsup"></i>
         </div>
-        <div>
-          <p align="center">
+        <div class="row">
+          <div class="col" align="center">
+            <input type="button" value="Cancel" class="button button-assertive" ng-click="cancelCanvass()">
+          </div>
+          <div class="col" align="center">
             <input type="submit" value="Submit" class="button button-positive" ng-disabled="!quickResult.qr && (quickResult.support == supportUnknown) && !result.answers">
-          </p>
+          </div>
         </div>
       </div>
 
       <ion-item ng-click="surveyAddr()">
-        <div class="item item-icon-left"><i class="icon ion-android-chat"></i>Survey</div>
+        <div class="item item-icon-left"><i class="icon ion-android-chat"></i>{{surveyPrompt}}</div>
       </ion-item>
     </ion-content>
   </form>

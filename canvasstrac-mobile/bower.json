@@ -1,5 +1,5 @@
 {
-  "name": "HelloIonic",
+  "name": "canvasstrac-mobile",
   "private": true,
   "devDependencies": {
     "ionic": "driftyco/ionic-bower#1.3.1"
@@ -8,9 +8,11 @@
     "angular": "1.5.3"
   },
   "dependencies": {
-    "angular-resource": "^1.5.8",
     "ngCordova": "^0.1.27-alpha",
     "chart.js": "^2.3.0",
-    "angular-chart.js": "^1.0.3"
+    "angular-chart.js": "^1.0.3",
+    "angular": "1.5.3",
+    "angular-resource": "1.5.3",
+    "angular-cookies": "1.5.3"
   }
 }

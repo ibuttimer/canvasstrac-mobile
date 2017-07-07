@@ -1,0 +1,7 @@
+﻿<div ng-if="inprogress.errormessage" style="color:#000000;" class="error-box">
+  <p align="center">{{inprogress.errormessage}}</p>
+</div>
+<div ng-if="inprogress.active" class="progress-box">
+  <div align="center"><ion-spinner icon="bubbles"></ion-spinner></div>
+  <p align="center">{{inprogress.progressmsg}}</p>
+</div>

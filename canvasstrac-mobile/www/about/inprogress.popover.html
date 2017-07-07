@@ -1,0 +1,9 @@
+﻿<ion-popover-view>
+  <ion-header-bar ng-if="title">
+    <h4 class="title">{{title}}</h4>
+  </ion-header-bar>
+  <ion-content>
+    <div align="center" ng-if="inprogress"><ion-spinner icon="bubbles"></ion-spinner></div>
+    <p align="center">{{message}}</p>
+  </ion-content>
+</ion-popover-view>

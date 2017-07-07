@@ -12,36 +12,85 @@ angular.module('canvassTrac')
     ];
   })())
   .value('LABELIDX', 0)
+  .value('INPROGRESS', {
+    errormessage: '',
+    active: false,
+    progressmsg: '',
+    stage: -1 // i.e. STAGES.LOGGED_OUT
+  })
   .factory('loginFactory', loginFactory);
 
 /* Manually Identify Dependencies
   https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#style-y091
 */
 
-loginFactory.$inject = ['$injector', 'authFactory', 'canvassFactory', 'surveyFactory', 'canvassAssignmentFactory', 'canvassResultFactory', 'pagerFactory',
-  'userFactory', 'addressFactory', 'electionFactory', 'questionFactory', 'storeFactory', 'resourceFactory', 'miscUtilFactory',
-  'STATES', 'RES', 'USER', 'SCHEMA_CONST', 'RESOURCE_CONST', 'CANVASSSCHEMA', 'SURVEYSCHEMA', 'CANVASSRES_SCHEMA', 'CANVASSASSIGN_SCHEMA', 'LABELS', 'LABELIDX'];
-function loginFactory($injector, authFactory, canvassFactory, surveyFactory, canvassAssignmentFactory, canvassResultFactory, pagerFactory,
-  userFactory, addressFactory, electionFactory, questionFactory, storeFactory, resourceFactory, miscUtilFactory,
-  STATES, RES, USER, SCHEMA_CONST, RESOURCE_CONST, CANVASSSCHEMA, SURVEYSCHEMA, CANVASSRES_SCHEMA, CANVASSASSIGN_SCHEMA, LABELS, LABELIDX) {
+loginFactory.$inject = ['$injector', '$q', '$timeout', 'authFactory', 'canvassFactory', 'surveyFactory', 'canvassAssignmentFactory', 'canvassResultFactory', 'pagerFactory',
+  'userFactory', 'addressFactory', 'electionFactory', 'questionFactory', 'storeFactory', 'resourceFactory', 'miscUtilFactory', 'utilFactory', 'consoleService',
+  'STATES', 'RES', 'USER', 'SCHEMA_CONST', 'RESOURCE_CONST', 'CANVASSSCHEMA', 'SURVEYSCHEMA', 'CANVASSRES_SCHEMA', 'CANVASSASSIGN_SCHEMA', 'LABELS', 'LABELIDX', 'INPROGRESS'];
+function loginFactory($injector, $q, $timeout, authFactory, canvassFactory, surveyFactory, canvassAssignmentFactory, canvassResultFactory, pagerFactory,
+  userFactory, addressFactory, electionFactory, questionFactory, storeFactory, resourceFactory, miscUtilFactory, utilFactory, consoleService,
+  STATES, RES, USER, SCHEMA_CONST, RESOURCE_CONST, CANVASSSCHEMA, SURVEYSCHEMA, CANVASSRES_SCHEMA, CANVASSASSIGN_SCHEMA, LABELS, LABELIDX, INPROGRESS) {
+
+  var con = consoleService.getLogger('loginFactory');
 
   // Bindable Members Up Top, https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#style-y033
-  var factory = {
-    setUp: setUp,
-    config: config,
-    clearData: clearData,
-    setFilter: setFilter,
-    requestUserDetails: requestUserDetails,
-    requestCanvasses: requestCanvasses,
-    requestAssignment: requestAssignment,
-    requestCompletedAssignments: requestCompletedAssignments
-  };
+  var 
+    // Note: must be sequential & in order
+    LOGGED_OUT = -1,
+    LOGIN = 0,
+    USER_DETAILS = 1,
+    REQ_CANVASSES = 2,
+    REQ_ASSIGNMENT = 3,
+    PROCESS_ASSIGNMENT = 4,
+    ASSIGNMENT_PROCESSED = 5,
+    LOGGED_IN = 6,
+
+    factory = {
+      setUp: setUp,
+      config: config,
+      clearData: clearData,
+      getDataItem: getDataItem,
+      setFilter: setFilter,
+      requestUserDetails: requestUserDetails,
+      requestCanvasses: requestCanvasses,
+      requestAssignment: requestAssignment,
+      requestCompletedAssignments: requestCompletedAssignments,
+      processLoginStage: processLoginStage,
+      doLogout: doLogout,
+      doLogin: doLogin,
+      doLoginFromStage: doLoginFromStage,
+      getLoginOptionObject: getLoginOptionObject,
+      //updateInProgress: updateInProgress,
+      //setErrorMsg: setErrorMsg,
+      //initInProgress: initInProgress,
+      STAGES: {
+        LOGGED_OUT: LOGGED_OUT,
+        LOGIN: LOGIN,
+        USER_DETAILS: USER_DETAILS,
+        REQ_CANVASSES: REQ_CANVASSES,
+        REQ_ASSIGNMENT: REQ_ASSIGNMENT,
+        PROCESS_ASSIGNMENT: PROCESS_ASSIGNMENT,
+        ASSIGNMENT_PROCESSED: ASSIGNMENT_PROCESSED,
+        LOGGED_IN: LOGGED_IN,
+        isInProcessStage: isInProcessStage,
+        isLoggedIn: isLoggedIn,
+        isProcessStageOrLoggedIn: isProcessStageOrLoggedIn,
+        currentStage: function () {
+          return INPROGRESS.stage;
+        },
+        nextStage: nextLoginStage
+      }
+    };
 
   return factory;
 
   /* function implementation
     -------------------------- */
 
+  /**
+   * Get the list of app data objects/ResourceLists 
+   * @returns {Array} 
+   */
   function getSetUpList() {
     return [
       { id: RES.CANVASS_LIST, title: 'Canvasses', list: true, factory: canvassFactory },
@@ -60,7 +109,7 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
   }
 
   /**
-   * Configure objects in a scope
+   * Setup objects in a scope
    * @param {object} options  Config options
    *  @see config() for details
    *  NOTE: Making copies of Window or Scope instances is not supported
@@ -112,8 +161,13 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
         }
       }
     });
+
+    options.scope.inprogress = INPROGRESS;
   }
 
+  /**
+   * Initialise all app data objects/ResourceLists 
+   */
   function clearData () {
     getSetUpList().forEach(function (entry) {
       if (entry.list) {
@@ -124,6 +178,33 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
     });
   }
 
+  /**
+   * Get an app data object/ResourceList
+   * @param {string} id     Id of item 
+   * @param {number} flags  storefactory flags
+   * @return {object}
+   */
+  function getDataItem (id, flags) {
+    var item,
+      itemEntry = getSetUpList().find(function (entry) {
+        return (entry.id === id);
+      });
+    if (itemEntry) {
+      if (itemEntry.list) {
+        item = itemEntry.factory.getList(id, flags);
+      } else {
+        item = itemEntry.factory.getObj(id, flags);
+      }
+    }
+    return item;
+  }
+
+  /**
+   * Configure a ResourceLsit
+   * @param {string} id
+   * @param {object} factory
+   * @param {number} options
+   */
   function configList (id, factory, options) {
     if (!options) {
       options = {};
@@ -139,7 +220,7 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
     if (create) {
       // create objects
       resList = factory.newList(id, options);
-      filter = storeFactory.newObj(filterId, factory.newFilter, storeFactory.CREATE_INIT);
+      filter = storeFactory.newObj(filterId, factory.newFilter(), storeFactory.CREATE_INIT);
       pager = pagerFactory.newPager(pagerId, [], 1, options.perPage, options.maxDispPage);
 
       resList.sortOptions = factory.getSortOptions();
@@ -176,6 +257,12 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
     }
   }
 
+  /**
+   * Configure an object
+   * @param {string} id
+   * @param {object} factory
+   * @param {number} options
+   */
   function configObj(id, factory, options) {
     if (!options) {
       options = {};
@@ -206,13 +293,369 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
     return resList.factory.setFilter(id, filter);
   }
 
+  /**
+   * Perform a logout
+   * @param {function} success  Function to call on success
+   * @param {function} failure  Function to call on failure
+   */
+  function doLogout(success, failure) {
+    initInProgress(LOGGED_OUT, 'doLogout');
+    //INPROGRESS.stage = LOGGED_OUT;
+    clearData();
+    authFactory.logout(success, failure);
+  }
+
+  /**
+   * Perform a login
+   * @param {function} processFunc  Function to provide stage options
+   * @param {number} start          Stage to start from; one of STAGES
+   */
+  function doLogin(processFunc, start) {
+    if (!start) {
+      start = LOGIN;
+    }
+    doLoginFromStage(start, processFunc);
+  }
+
+  /**
+   * Perfrom a login started from the specified stage
+   * @param {number}   stage        Stage to start from; one of STAGES
+   * @param {function} processFunc  Function to probide stage options
+   */
+  function doLoginFromStage(stage, processFunc, arg0) {
+    var promise = processLoginStage(stage, processFunc, arg0);
+    if (promise) {
+      promise.then(
+        function (result) {
+          continueLogin(result.nextStage, processFunc, result.arg0);
+        },
+        function (nextStage) {
+          // promise rejected
+          if (nextStage === LOGGED_IN) {
+            initInProgress(LOGGED_IN, 'promise rejected');
+          }
+        });
+    }
+  }
+
+  /**
+   * Continue a login started from the specified stage
+   * @param {number}   nextStage    Stage to continue from; one of STAGES
+   * @param {function} processFunc  Function to probide stage options
+   */
+  function continueLogin(nextStage, processFunc, arg0) {
+
+    console.log('continueLogin', nextStage);
+
+
+    // promise resolved successfully
+    if (isInProcessStage(nextStage)) {
+      doLoginFromStage(nextStage, processFunc, arg0);
+    } else {
+      INPROGRESS.stage = nextStage;
+    }
+  }
+
+
+
+  /**
+   * Get a basic login option object
+   * @returns {object} 
+   */
+  function getLoginOptionObject() {
+    return {
+      queryProcess: undefined,
+      progressUpdate: undefined,
+      loginData: undefined,
+      userId: undefined,
+      canvassId: undefined,
+      onSuccess: function () {
+        return true;  // continue processing
+      },
+      onFailure: function (response) {
+        return false;  // stop processing
+      }
+    };
+  }
+
+  /**
+   * Process a specific login stage
+   * @param {number}          stage    Stage to start from; one of STAGES
+   * @param {object|function} stageOpt Options for stage or function to get them
+   * @returns {object} promise to be resolved. The resolve value will be the next stage to do.
+   */
+  function processLoginStage(stage, stageOpt, arg0) {
+    var queryProcess,
+      options,
+      progressUpdate,
+      onSuccess,
+      onFailure,
+      promise;
+
+
+    console.log('processLoginStage', stage);
+
+
+    if (typeof stageOpt === 'function') {
+      options = stageOpt(stage);
+    } else {
+      options = stageOpt;
+    }
+
+    switch (stage) {
+      case LOGIN:
+      case USER_DETAILS:
+      case REQ_CANVASSES:
+      case REQ_ASSIGNMENT:
+      case PROCESS_ASSIGNMENT:
+      case ASSIGNMENT_PROCESSED:
+        queryProcess = options.queryProcess || function () {
+          return true;
+        };
+        if (options.progressUpdate) {
+          progressUpdate = function (update, stage, dbg) {
+            updateInProgress(update, stage, dbg);
+            options.progressUpdate(update, stage);
+          };
+        } else {
+          progressUpdate = updateInProgress;
+        }
+        /**
+         * Function to call on success
+         * @param {object} response   Server response
+         * @param {function} resolve  Promise resolve function
+         * @param {function} reject   Promise reject function
+         * @param {number} nextStage  Next stage to process in sequence
+         * @param {object} arg0       Optional extra argument
+         */
+        onSuccess = function (response, resolve, reject, nextStage, arg0) {
+          // next stage is the resolve result
+          promiseRtn(resolve, reject, on(options.onSuccess, response, arg0), {
+            nextStage: nextStage,
+            arg0: response
+          });
+        };
+        /**
+         * Function to call on failure
+         * @param {object} response   Server response
+         * @param {function} resolve  Promise resolve function
+         * @param {function} reject   Promise reject function
+         * @param {number} nextStage  Next stage to process in sequence
+         */
+        onFailure = function (response, resolve, reject, nextStage) {
+          setErrorMsg(response);
+          // next stage is the reject reason
+          promiseRtn(resolve, reject, on(options.onFailure, response), undefined, nextStage);
+        };
+        break;
+      default:
+        return false;
+    }
+
+    switch (stage) {
+      case LOGIN:
+        progressUpdate('Logging in', stage, 'LOGIN');
+
+        promise = $q(function (resolve, reject) {
+          authFactory.login(options.loginData,
+            function (response) {
+              // successfully logged in
+              onSuccess(response, resolve, reject, USER_DETAILS);
+            },
+            function (response) {
+              // log in failed
+              onFailure(response, resolve, reject, stage);
+            }
+          );
+        });
+        break;
+
+      case USER_DETAILS:
+        progressUpdate('Retrieving user details', stage, 'USER_DETAILS');
+
+        promise = $q(function (resolve, reject) {
+          requestUserDetails(options.userId,
+            queryProcess,
+            function (response) {
+              // retrieve user details success
+              onSuccess(response, resolve, reject, REQ_CANVASSES);
+            },
+            function (response) {
+              // retrieve user details failed
+              onFailure(response, resolve, reject, stage);
+            }
+          );
+        });
+        break;
+
+      case REQ_CANVASSES:
+        progressUpdate('Retrieving canvass details', stage, 'REQ_CANVASSES');
+
+        // request the canvass addresses assigned to the user
+        promise = $q(function (resolve, reject) {
+          requestCanvasses(options.userId,
+            queryProcess,
+            function (response) {   // onSuccess
+              // retrieve canvass success
+              onSuccess(response, resolve, reject, REQ_ASSIGNMENT, 
+                          canvassFactory.getObj(RES.CANVASS_LIST));
+            },
+            function (response) {
+              // retrieve canvass failed
+              onFailure(response, resolve, reject, stage);
+            }
+          );
+        });
+        break;
+
+      case REQ_ASSIGNMENT:
+        progressUpdate('Retrieving assignments', stage, 'REQ_ASSIGNMENT');
+
+        promise = $q(function (resolve, reject) {
+          requestAssignment(options.userId, options.canvassId,
+            queryProcess,
+            function (response) {
+              // retrieve assignment success
+              onSuccess(response, resolve, reject, PROCESS_ASSIGNMENT);
+            },
+            function (response) {
+              // retrieve assignment failed
+              onFailure(response, resolve, reject, stage);
+            },
+            continueLogin.bind(null, PROCESS_ASSIGNMENT, stageOpt)  // function to call when processing starts
+          );
+        });
+        break;
+
+      case PROCESS_ASSIGNMENT:
+        progressUpdate('Processing assignments', stage, 'PROCESS_ASSIGNMENT');
+
+        promise = $q(function (resolve, reject) {
+          processAssignment(
+            arg0,
+            queryProcess,
+            function (response) {
+              // retrieve assignment success
+              onSuccess(response, resolve, reject, ASSIGNMENT_PROCESSED);
+            }
+          );
+        });
+        break;
+
+      case ASSIGNMENT_PROCESSED:
+        promise = $q(function (resolve, reject) {
+          initInProgress(LOGGED_IN, 'ASSIGNMENT_PROCESSED');
+          // resolve promise immediately
+          onSuccess(null, resolve, reject, LOGGED_IN);
+        });
+        break;
+    }
+    return promise;
+  }
+
+  /**
+   * Check if sequence should continue
+   * @param {function}  func      Function to call to check
+   * @param {object}    response  Response for func to check
+   * @param {object}    arg0      Optional additional argument
+   * @returns {boolean} true if sequence should continue
+   */
+  function on(func, response, arg0) {
+    var cont = true;
+    if (func) {
+      cont = func(response, arg0);
+    }
+    return cont;
+  }
+
+  /**
+   * 
+   * @param {function}  resolve Promise resolve function
+   * @param {function}  reject  Promise reject function
+   * @param {boolean}   ok      Resolve/reject flag
+   * @param {nnmber}    result  resolve result
+   * @param {number}    reason  reject reason
+   */
+  function promiseRtn (resolve, reject, ok, result, reason) {
+    if (ok) {
+      resolve(result);
+    } else {
+      reject(reason);
+    }
+  }
+
+  function updateInProgress(update, stage, dbg) {
+
+    $timeout(function() {
+      if (update) {
+        INPROGRESS.active = true;
+        INPROGRESS.progressmsg = update;
+      } else {
+        INPROGRESS.active = false;
+        INPROGRESS.progressmsg = '';
+      }
+      if (stage !== undefined && (typeof stage === 'number')) {
+        INPROGRESS.stage = stage;
+      }
+
+      con.debug('progress update ['+ dbg+']: ' + INPROGRESS.stage + ' ' + INPROGRESS.active + ' ' + INPROGRESS.progressmsg);
+    }, 0);
+
+  }
+
+  function setErrorMsg(response, stage, dbg) {
+    updateInProgress('', stage, dbg);
+    if (response) {
+      INPROGRESS.errormessage = utilFactory.getErrorMsg(response);
+    } else {
+      INPROGRESS.errormessage = '';
+    }
+  }
+
+  function initInProgress(stage, dbg) {
+    if (typeof stage === 'string') {
+      dbg = stage;
+      stage = undefined;
+    }
+    setErrorMsg(undefined, stage, dbg);
+  }
+
+  function checkStage(stage) {
+    if (stage === undefined) {
+      stage = INPROGRESS.stage;
+    }
+    return stage;
+  }
+
+  function isInProcessStage(stage) {
+    stage = checkStage(stage);
+    return ((stage >= LOGIN) && (stage < LOGGED_IN));
+  }
+
+  function isLoggedIn(stage) {
+    return (checkStage(stage) === LOGGED_IN);
+  }
+
+  function isProcessStageOrLoggedIn(stage) {
+    return (isInProcessStage(stage) || isLoggedIn(stage));
+  }
+
+  function nextLoginStage(stage) {
+    var next = checkStage(stage) + 1;
+    if (!isProcessStageOrLoggedIn(next)) {
+      next = undefined;
+    }
+    return next;
+  }
+
+
 
   // Request the user's details
   function requestUserDetails (id, queryProcess, onSuccess, onFailure) {
 
-    console.debug('requestUserDetails:' + id);
+    con.debug('requestUserDetails:' + id);
 
-    userFactory.getUsers().get({ id: id }).$promise.then(
+    userFactory.get('user', { id: id },
       // success function
       function (response) {
         // response from server contains result
@@ -226,7 +669,7 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
               USER.person = user.person;
 
               if (onSuccess) {
-                onSuccess();
+                onSuccess(response);
               }
             }
           });
@@ -253,18 +696,66 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
    * @param {function} onSuccess    Function to call on sucessful completion
    * @param {function} onFailure    Functio to call on failure
    */
-  function requestAssignedCanvasses(id, queryProcess, onSuccess, onFailure) {
+  //function requestAssignedCanvasses(id, queryProcess, onSuccess, onFailure) {
 
-    console.debug('requestAssignedCanvasses: ' + id);
+  //  con.debug('requestAssignedCanvasses: ' + id);
 
-    canvassAssignmentFactory.getAssignmentCanvasses().query({ canvasser: id }).$promise.then(
+  //  canvassAssignmentFactory.query('canvasses', { canvasser: id },
+  //    // success function
+  //    function (response) {
+  //      // response from server contains result
+  //      if (queryProcess()) {
+  //        var flags = (storeFactory.CREATE_INIT | storeFactory.APPLY_FILTER);
+
+  //        canvassFactory.readResponse(response, getAssignmentRspOptions(flags, onSuccess));
+  //      }
+  //    },
+  //    // error function
+  //    function (response) {
+  //      if (onFailure) {
+  //        onFailure(response);
+  //      }
+  //    }
+  //  );
+  //}
+
+  /**
+   * Request the user's canvass assignments
+   * @param {string} userId         Id of canvasser to request for
+   * @param {string} canvassId      Id of canvass to request for
+   * @param {function} queryProcess Perdicate function to determine if response is processed
+   * @param {function} onSuccess    Function to call on sucessful completion
+   * @param {function} onFailure    Function to call on failure
+   */
+  function requestAssignment(userId, canvassId, queryProcess, onSuccess, onFailure) {
+
+    var param = {};
+    if (userId) {
+      param.canvasser = userId;
+    }
+    if (canvassId) {
+      param.canvass = canvassId;
+    }
+
+    con.debug('requestAssignment: user ' + userId + ' canvass ' + canvassId);
+
+    canvassAssignmentFactory.query('assignment', param,
       // success function
       function (response) {
         // response from server contains result
         if (queryProcess()) {
-          var flags = (storeFactory.CREATE_INIT | storeFactory.APPLY_FILTER);
+          var flags = (storeFactory.CREATE_INIT | storeFactory.APPLY_FILTER),
+            toProcess = response;
 
-          canvassFactory.readResponse(response, getAssignmentRspOptions(flags, onSuccess));
+          /* TODO come up with better approach of handling assignment response
+            should only be one response for queries using both user & canvass ids but not handling generically atm */
+          if (Array.isArray(response)) {
+            toProcess = response[0];
+          }
+
+          /* could process the response here but it means the UI appears frozen atm, just return the response */
+          //canvassAssignmentFactory.readResponse(toProcess, getAssignmentRspOptions(flags, onSuccess));
+          onSuccess(toProcess);
         }
       },
       // error function
@@ -282,44 +773,16 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
    * @param {string} canvassId      Id of canvass to request for
    * @param {function} queryProcess Perdicate function to determine if response is processed
    * @param {function} onSuccess    Function to call on sucessful completion
-   * @param {function} onFailure    Functio to call on failure
+   * @param {function} onFailure    Function to call on failure
+   * @param {function} onProcStart  Function to call when processing starts
    */
-  function requestAssignment (userId, canvassId, queryProcess, onSuccess, onFailure) {
+  function processAssignment(toProcess, queryProcess, onSuccess) {
 
-    var param = {};
-    if (userId) {
-      param.canvasser = userId;
-    }
-    if (canvassId) {
-      param.canvass = canvassId;
-    }
+    con.debug('processAssignment:');
 
-    console.debug('requestAssignment: user ' + userId + ' canvass ' + canvassId);
+    var flags = (storeFactory.CREATE_INIT | storeFactory.APPLY_FILTER)
 
-    canvassAssignmentFactory.getCanvassAssignment().query(param).$promise.then(
-      // success function
-      function (response) {
-        // response from server contains result
-        if (queryProcess()) {
-          var flags = (storeFactory.CREATE_INIT | storeFactory.APPLY_FILTER),
-            toProcess = response;
-
-          /* TODO come up with better approach of handling assignment response
-            should only be one response for queries using both user & canvass ids but not handling generically atm */
-          if (Array.isArray(response)) {
-            toProcess = response[0];
-          }
-
-          canvassAssignmentFactory.readResponse(toProcess, getAssignmentRspOptions(flags, onSuccess));
-        }
-      },
-      // error function
-      function (response) {
-        if (onFailure) {
-          onFailure(response);
-        }
-      }
-    );
+    canvassAssignmentFactory.readResponse(toProcess, getAssignmentRspOptions(flags, onSuccess));
   }
 
   /**
@@ -331,9 +794,9 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
    */
   function requestCanvasses (id, queryProcess, onSuccess, onFailure) {
 
-    console.debug('requestCanvasses: ' + id);
+    con.debug('requestCanvasses: ' + id);
 
-    canvassAssignmentFactory.getAssignmentCanvasses().query({ canvasser: id }).$promise.then(
+    canvassAssignmentFactory.query('canvasses', { canvasser: id },
       // success function
       function (response) {
         // response from server contains result
@@ -354,29 +817,26 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
 
 
   function getAssignmentRspOptions (schema, flags, next) {
-    var //args = checkArgs(schema, flags, next),
-      addrOpts = getRspAddressOptions(RES.ALLOCATED_ADDR, {
-        schema: CANVASSASSIGN_SCHEMA.SCHEMA,
-        schemaId: CANVASSASSIGN_SCHEMA.IDs.ADDRESSES,
-      }, /*(args.flags |*/ storeFactory.COPY_SET/*)*/),  // make copy of addresses
-      canvsrOpts = getRspCanvasserOptions(RES.ALLOCATED_CANVASSER, {
-        schema: CANVASSASSIGN_SCHEMA.SCHEMA,
-        schemaId: CANVASSASSIGN_SCHEMA.IDs.CANVASSER,
-      }, /*(args.flags |*/ storeFactory.COPY_SET/*)*/), // make copy of canvasser
-      canvassOpts = getCanvassRspOptions({
-        schema: CANVASSASSIGN_SCHEMA.SCHEMA,
-        schemaId: CANVASSASSIGN_SCHEMA.IDs.CANVASS
-      }),
+    var addrOpts = getRspAddressOptions(RES.ALLOCATED_ADDR,
+                  CANVASSASSIGN_SCHEMA.SCHEMA.getSchemaLink(CANVASSASSIGN_SCHEMA.IDs.ADDRESSES),
+                  storeFactory.COPY_SET),  // make copy of addresses
+      canvsrOpts = getRspCanvasserOptions(RES.ALLOCATED_CANVASSER,
+                  CANVASSASSIGN_SCHEMA.SCHEMA.getSchemaLink(CANVASSASSIGN_SCHEMA.IDs.CANVASSER),
+                  storeFactory.COPY_SET), // make copy of canvasser
+      canvassOpts = getCanvassRspOptions(
+                  CANVASSASSIGN_SCHEMA.SCHEMA.getSchemaLink(CANVASSASSIGN_SCHEMA.IDs.CANVASS)),
       rspOptions = resourceFactory.getStandardArgsObject(
           undefined,    // no objId as don't need to save the assignments response
           'canvassAssignmentFactory', [
-          canvsrOpts,   // storage info for canvassers
-          addrOpts,     // storage info for addresses
-          canvassOpts   // storage info for canvass
-        ], schema, flags, next);
+            canvsrOpts,   // storage info for canvassers
+            addrOpts,     // storage info for addresses
+            canvassOpts   // storage info for canvass
+          ], 
+          schema, flags, next, {
+            linkAddressAndResult: true
+          });
 
     // mark address & result objects for linking
-    rspOptions.linkAddressAndResult = true;
     addrOpts[canvassFactory.ADDR_RES_LINKADDRESS] = true;
     // results are in canvass sub doc
 
@@ -390,94 +850,37 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
     applyParentFlags(rspOptions);
 
     return rspOptions;
-
-    //return {
-    //  // no objId as don't need to save the assignments response
-    //  flags: args.flags,
-    //  next: args.next,
-    //  subObj: [
-    //      // storage info for canvasser
-    //      canvsrOpts,
-    //      // storage info for addresses
-    //      addrOpts,
-    //      // storage info for canvass
-    //      getCanvassRspOptions({
-    //        schema: CANVASSASSIGN_SCHEMA.SCHEMA,
-    //        schemaId: CANVASSASSIGN_SCHEMA.IDs.CANVASS
-    //      }, args.flags)
-    //  ],
-    //  linkAddressAndResult: true,
-    //  linkAddressAndCanvasser: {
-    //    labeller: labeller
-    //  }
-    //};
   }
 
-  function getCanvassRspOptions(schema, flags, next, custom) {
-    var args = resourceFactory.checkStandardArgsObjectArgs(schema, flags, next, custom),
-      addrOpts = getRspAddressOptions(RES.ASSIGNED_ADDR, {
-        schema: CANVASSSCHEMA.SCHEMA,
-        schemaId: CANVASSSCHEMA.IDs.ADDRESSES,
-      }, (args.flags | storeFactory.COPY_SET)),  // make copy of addresses
-      canvsrOpts = getRspCanvasserOptions(RES.ASSIGNED_CANVASSER, {
-        schema: CANVASSSCHEMA.SCHEMA,
-        schemaId: CANVASSSCHEMA.IDs.CANVASSERS,
-      }, (args.flags | storeFactory.COPY_SET)),  // make copy of canvassers
-      resltsOpts = getRspResultOptions(RES.CANVASS_RESULT, {
-        schema: CANVASSSCHEMA.SCHEMA,
-        schemaId: CANVASSSCHEMA.IDs.RESULTS,
-      }, (args.flags | storeFactory.COPY_SET)),   // make copy of results
-      electionOpts = getRspElectionOptions(RES.ACTIVE_ELECTION, {
-        schema: CANVASSSCHEMA.SCHEMA,
-        schemaId: CANVASSSCHEMA.IDs.ELECTION,
-      }),
-      surveyOpts = getSurveyRspOptions({
-        schema: CANVASSSCHEMA.SCHEMA,
-        schemaId: CANVASSSCHEMA.IDs.SURVEY
-      }),
-      rspOptions = resourceFactory.getStandardArgsObject(RES.ACTIVE_CANVASS, 'canvassFactory', [
-          electionOpts, // storage info for election
-          surveyOpts,   // storage info for survey
-          addrOpts,     // storage info for addresses
-          canvsrOpts,   // storage info for canvassers
-          resltsOpts    // storage info for results
-      ], schema, flags, next, custom);
+  function getCanvassRspOptions(schema, flags, next, customArgs) {
+    var rspOptions = resourceFactory.getStandardArgsObject(RES.ACTIVE_CANVASS, 'canvassFactory',
+                  schema, flags, next, customArgs),
+      addrOpts = getRspAddressOptions(RES.ASSIGNED_ADDR,
+                  CANVASSSCHEMA.SCHEMA.getSchemaLink(CANVASSSCHEMA.IDs.ADDRESSES),
+                  storeFactory.COPY_SET),  // make copy of addresses
+      canvsrOpts = getRspCanvasserOptions(RES.ASSIGNED_CANVASSER,
+                  CANVASSSCHEMA.SCHEMA.getSchemaLink(CANVASSSCHEMA.IDs.CANVASSERS),
+                  storeFactory.COPY_SET),  // make copy of canvassers
+      resltsOpts = getRspResultOptions(RES.CANVASS_RESULT,
+                  CANVASSSCHEMA.SCHEMA.getSchemaLink(CANVASSSCHEMA.IDs.RESULTS),
+                  storeFactory.COPY_SET),   // make copy of results
+      electionOpts = getRspElectionOptions(RES.ACTIVE_ELECTION,
+                  CANVASSSCHEMA.SCHEMA.getSchemaLink(CANVASSSCHEMA.IDs.ELECTION)),
+      surveyOpts = getSurveyRspOptions(
+                  CANVASSSCHEMA.SCHEMA.getSchemaLink(CANVASSSCHEMA.IDs.SURVEY));
 
-
-      //rspOptions = {
-      //  objId: RES.ACTIVE_CANVASS,
-      //  factory: args.factory,
-      //  schema: args.schema.schema,
-      //  schemaId: args.schema.schemaId,
-      //  storage: RESOURCE_CONST.STORE_OBJ,
-      //  flags: args.flags,
-      //  next: args.next,
-      //  subObj: [
-      //    // storage arguments for specific sub sections of survey info
-      //    { // storage info for election
-      //      objId: RES.ACTIVE_ELECTION, // id of election object to save response data to
-      //      schema: CANVASSSCHEMA.SCHEMA,
-      //      schemaId: CANVASSSCHEMA.IDs.ELECTION,
-      //      //type/path/storage/factory: can be retrieved using schema & schemaId
-      //      flags: args.flags
-      //    },
-      //    // storage info for survey
-      //    getSurveyRspOptions({
-      //      schema: CANVASSSCHEMA.SCHEMA,
-      //      schemaId: CANVASSSCHEMA.IDs.SURVEY
-      //    }, args.flags),
-      //    // storage info for addresses
-      //    addrOpts,
-      //    // storage info for canvassers
-      //    canvsrOpts,
-      //    // storage info for results
-      //    resltsOpts
-      //  ],
-      //  linkAddressAndResult: true
-      //};
+    rspOptions.subObj = makeOrAppendArray(rspOptions.subObj, [
+      electionOpts, // storage info for election
+      surveyOpts,   // storage info for survey
+      addrOpts,     // storage info for addresses
+      canvsrOpts,   // storage info for canvassers
+      resltsOpts    // storage info for results
+    ]);
 
     // mark address & result objects for linking
-    rspOptions.linkAddressAndResult = true;
+    angular.extend(rspOptions.customArgs, {
+      linkAddressAndResult: true
+    });
     addrOpts[canvassFactory.ADDR_RES_LINKADDRESS] = true;
     resltsOpts[canvassFactory.ADDR_RES_LINKRESULT] = true;
 
@@ -486,31 +889,25 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
     canvsrOpts[canvassAssignmentFactory.ADDR_CANVSR_CANVASSERARRAY] = true;
 
     applyParentFlags(rspOptions);
-    applyCustom(rspOptions, args.custom);
-    //if (args.custom) {
-    //  // add custom items
-    //  miscUtilFactory.copyProperties(args.custom, rspOptions);
-    //}
+    applyCustom(rspOptions, rspOptions.customArgs);
 
     return rspOptions;
   }
 
-  function getCanvassesListRspOptions (schema, flags, next, custom) {
-    var args = resourceFactory.checkStandardArgsObjectArgs(schema, flags, next, custom),
-      electionOpts = getRspElectionOptions(undefined, { // not saving elections seperately
-        schema: CANVASSSCHEMA.SCHEMA,
-        schemaId: CANVASSSCHEMA.IDs.ELECTION,
-      }),
+  function getCanvassesListRspOptions (schema, flags, next, customArgs) {
+    var rspOptions = resourceFactory.getStandardArgsObject(RES.CANVASS_LIST, 'canvassFactory',
+                            schema, flags, next, customArgs),
+      electionOpts = getRspElectionOptions(undefined, // not saving elections separately
+                  CANVASSSCHEMA.SCHEMA.getSchemaLink(CANVASSSCHEMA.IDs.ELECTION)),
       // basic survey info, no sub objs
-      surveyOpts = resourceFactory.getStandardArgsObject(undefined, { // not saving surveys seperately
-        schema: CANVASSSCHEMA.SCHEMA,
-        schemaId: CANVASSSCHEMA.IDs.SURVEY
-      }, flags, next, custom),
-      rspOptions = resourceFactory.getStandardArgsObject(RES.CANVASS_LIST, 'canvassFactory', [
-          electionOpts, // storage info for election
-          surveyOpts   // storage info for survey
-          // ignore info for addresses/canvassers/results
-        ], schema, flags, next, custom);
+      surveyOpts = resourceFactory.getStandardArgsObject(undefined, // not saving surveys seperately
+                  CANVASSSCHEMA.SCHEMA.getSchemaLink(CANVASSSCHEMA.IDs.SURVEY));
+
+    rspOptions.subObj = makeOrAppendArray(rspOptions.subObj, [
+      electionOpts, // storage info for election
+      surveyOpts   // storage info for survey
+      // ignore info for addresses/canvassers/results
+    ]);
 
     // read all except addresses/canvassers/results
     rspOptions.schemaReadIds = [
@@ -521,7 +918,6 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
     rspOptions.schemaExcludeMode = true;
 
     applyParentFlags(rspOptions);
-    applyCustom(rspOptions, args.custom);
     applyCustomToSubObj(rspOptions, {
       processArg: RESOURCE_CONST.PROCESS_READ  // argument only for use during read
     });
@@ -529,22 +925,22 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
     return rspOptions;
   }
 
-  function getRspElectionOptions(objId, schema, flags, next, custom) {
+  function getRspElectionOptions(objId, schema, flags, next, customArgs) {
     // storage info for elections
-    return resourceFactory.getStandardArgsObject(objId, 'electionFactory', schema, flags, next, custom);
+    return resourceFactory.getStandardArgsObject(objId, 'electionFactory', schema, flags, next, customArgs);
   }
 
-  function getRspAddressOptions(objId, schema, flags, next, custom) {
+  function getRspAddressOptions(objId, schema, flags, next, customArgs) {
     // storage info for addresses
-    return resourceFactory.getStandardArgsObject(objId, 'addressFactory', schema, flags, next, custom);
+    return resourceFactory.getStandardArgsObject(objId, 'addressFactory', schema, flags, next, customArgs);
   }
 
-  function getRspCanvasserOptions(objId, schema, flags, next, custom) {
+  function getRspCanvasserOptions(objId, schema, flags, next, customArgs) {
     // storage info for canvassers
-    return resourceFactory.getStandardArgsObject(objId, 'userFactory', schema, flags, next, custom);
+    return resourceFactory.getStandardArgsObject(objId, 'userFactory', schema, flags, next, customArgs);
   }
 
-  function getRspResultOptions(objId, schema, flags, next, custom) {
+  function getRspResultOptions(objId, schema, flags, next, customArgs) {
     // storage info for results, no need to decode embedded address/canvass/voter subdocs as not required
     var modelProps = CANVASSRES_SCHEMA.SCHEMA.getModelPropList({
         type: SCHEMA_CONST.FIELD_TYPES.OBJECTID,  // get list of properties of type OBJECTID
@@ -580,23 +976,8 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
       });
     });
     
-    return resourceFactory.getStandardArgsObject(objId, 'canvassResultFactory', subObj, schema, flags, next, custom);
+    return resourceFactory.getStandardArgsObject(objId, 'canvassResultFactory', subObj, schema, flags, next, customArgs);
   }
-
-  //function getRspOptionsObject(objId, factory, subObj, schema, flags, next, custom) {
-  //  var args = checkArgs(factory, subObj, schema, flags, next, custom);
-  //  return { // storage info for results
-  //    objId: objId,
-  //    factory: args.factory,
-  //    schema: args.schema.schema,
-  //    schemaId: args.schema.schemaId,
-  //    //type/path/storage/factory: can be retrieved using schema & schemaId
-  //    subObj: args.subObj,
-  //    flags: args.flags,
-  //    next: args.next,
-  //    custom: args.custom
-  //  };
-  //}
 
   function applyParentFlags(rspOptions) {
     if (rspOptions.subObj) {
@@ -606,99 +987,39 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
     }
   }
 
-  function applyCustom(rspOptions, custom) {
-    if (custom) {
+  function applyCustom(rspOptions, customArgs) {
+    if (customArgs) {
       // add custom items
-      miscUtilFactory.copyProperties(custom, rspOptions);
+      miscUtilFactory.copyProperties(customArgs, rspOptions);
     }
   }
 
-  function applyCustomToSubObj(rspOptions, custom) {
-    if (rspOptions.subObj && custom) {
+  function applyCustomToSubObj(rspOptions, customArgs) {
+    if (rspOptions.subObj && customArgs) {
       // add custom items
       miscUtilFactory.toArray(rspOptions.subObj).forEach(function (obj) {
-        miscUtilFactory.copyProperties(custom, obj);
+        miscUtilFactory.copyProperties(customArgs, obj);
       });
     }
   }
 
-  //function checkArgs (factory, subObj, schema, flags, next, custom) {
-  //  if (!angular.isString(factory)) {
-  //    custom = next;
-  //    next = flags;
-  //    flags = schema;
-  //    schema = subObj;
-  //    subObj = factory;
-  //    factory = undefined;
-  //  }
-  //  if (!angular.isArray(subObj)) {
-  //    custom = next;
-  //    next = flags;
-  //    flags = schema;
-  //    schema = subObj;
-  //    subObj = undefined;
-  //  }
-  //  if (!angular.isObject(schema)) {
-  //    custom = next;
-  //    next = flags;
-  //    flags = schema;
-  //    schema = {};
-  //  }
-  //  if (!angular.isNumber(flags)) {
-  //    custom = next;
-  //    next = flags;
-  //    flags = storeFactory.NOFLAG;
-  //  }
-  //  if (!angular.isFunction(next)) {
-  //    custom = next;
-  //    next = undefined;
-  //  }
-  //  return {
-  //    factory: factory, schema: schema, subObj: subObj, 
-  //    flags: flags, next: next, custom: custom
-  //  };
-  //}
+  function makeOrAppendArray(array, toAdd) {
+    if (!array) {
+      array = [];
+    }
+    return miscUtilFactory.toArray(array).concat(toAdd);
+  }
 
-  function getSurveyRspOptions(schema, flags, next, custom) {
-    var //args = checkArgs('surveyFactory', schema, flags, next, custom);
-      subObj = resourceFactory.getStandardArgsObject(RES.SURVEY_QUESTIONS, {
-          schema: SURVEYSCHEMA.SCHEMA,
-          schemaId: SURVEYSCHEMA.IDs.QUESTIONS,
-        }, storeFactory.COPY_SET),  // make copy of questions
 
-    //{
-    //  // storage arguments for specific sub sections of survey info
-    //  objId: RES.SURVEY_QUESTIONS,
-    //  schema: SURVEYSCHEMA.SCHEMA,
-    //  schemaId: SURVEYSCHEMA.IDs.QUESTIONS,
-    //  //type/path/storage/factory: can be retrieved using schema & schemaId
-    //  flags: storeFactory.COPY_SET  // make copy of questions
-    //},
-      rspOptions = resourceFactory.getStandardArgsObject(RES.ACTIVE_SURVEY, 'surveyFactory', [subObj], schema, flags, next, custom);
+  function getSurveyRspOptions(schema, flags, next, customArgs) {
+    var subObj = resourceFactory.getStandardArgsObject(RES.SURVEY_QUESTIONS,
+                  SURVEYSCHEMA.SCHEMA.getSchemaLink(SURVEYSCHEMA.IDs.QUESTIONS),
+                  storeFactory.COPY_SET),  // make copy of questions
+      rspOptions = resourceFactory.getStandardArgsObject(RES.ACTIVE_SURVEY, 'surveyFactory', [subObj], schema, flags, next, customArgs);
 
     applyParentFlags(rspOptions);
 
     return rspOptions;
-    //return {
-    //  // storage info for survey
-    //  objId: RES.ACTIVE_SURVEY,
-    //  factory: args.factory,
-    //  schema: args.schema.schema,
-    //  schemaId: args.schema.schemaId,
-    //  //type/path/storage: can be retrieved using schema & schemaId
-    //  storage: RESOURCE_CONST.STORE_OBJ,
-    //  flags: args.flags,
-    //  next: args.next,
-    //  subObj: {
-    //    // storage arguments for specific sub sections of survey info
-    //    objId: RES.SURVEY_QUESTIONS,
-    //    //factory: 'questionFactory',
-    //    schema: SURVEYSCHEMA.SCHEMA,
-    //    schemaId: SURVEYSCHEMA.IDs.QUESTIONS,
-    //    //type/path/storage/factory: can be retrieved using schema & schemaId
-    //    flags: args.flags | storeFactory.COPY_SET  // make copy of questions
-    //  }
-    //};
   }
 
   function findOption (options, objId) {
@@ -729,12 +1050,12 @@ function loginFactory($injector, authFactory, canvassFactory, surveyFactory, can
   // Request the user's canvass assignments
   function requestCompletedAssignments(canvassId, canvasserId, queryProcess, onSuccess, onFailure) {
 
-    console.debug('requestCompletedAssignments: canvass ' + canvassId + ' user ' + canvasserId);
+    con.debug('requestCompletedAssignments: canvass ' + canvassId + ' user ' + canvasserId);
 
-    canvassFactory.getCanvassResult().query({
+    canvassResultFactory.query('result', {
       canvass: canvassId,
       canvasser: canvasserId
-    }).$promise.then(
+    },
       // success function
       function (response) {
         // response from server contains result

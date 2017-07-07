@@ -20,9 +20,11 @@ $dark:                            #444 !default;
 // The path for our ionicons font files, relative to the built CSS in www/css
 $ionicons-font-path: "../lib/ionic/fonts" !default;
 
-
 // Include all of Ionic
 @import "www/lib/ionic/scss/ionic";
+
+$lime:                           #00ff00 !default;
+
 
 .center-form {
 	width: 290px;
@@ -49,15 +51,21 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 }
 .error-box {
 	padding: 10px;
-	border: 1px solid darken($assertive, 10%);
+	border: 4px solid darken($assertive, 10%);
 	background-color: $assertive;
 	border-radius: 4px;
-	margin-bottom: 10px;
+	margin: 10px;
 	p{
 		color: white;
 		margin: 0px;
 	}
-	
+}
+
+.progress-box {
+	padding: 10px;
+	border: 4px solid $lime;
+	border-radius: 4px;
+	margin: 10px;
 }
 
 
@@ -84,4 +92,16 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
   td {
     word-wrap: break-word
   }
+}
+
+
+
+.ul-style {
+  list-style-type: square;
+}
+.ul-style li {
+    // copied from ionic.css .item p
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 2px;
 }

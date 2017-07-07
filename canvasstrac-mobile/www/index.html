@@ -24,6 +24,8 @@
     <script src="lib/ngCordova/dist/ng-cordova.js"></script>
     <script src="lib/chart.js/dist/Chart.min.js"></script>
     <script src="lib/angular-chart.js/dist/angular-chart.min.js"></script>
+    <script src="lib/angular-cookies/angular-cookies.js"></script>
+    <!--<script src="lib/angular-cookies/angular-cookies.min.js"></script>-->
 
     <!-- cordova script (this will be a 404 during development) -->
     <script src="cordova.js"></script>
@@ -36,11 +38,16 @@
     <script src="canvasstrac-client-common/util/store.util.js"></script>
     <script src="canvasstrac-client-common/util/miscutil.factory.js"></script>
     <script src="canvasstrac-client-common/util/schema.provider.js"></script>
-    <script src="canvasstrac-client-common/util/resource.factory.js"></script>
     <script src="canvasstrac-client-common/util/compare.factory.js"></script>
     <script src="canvasstrac-client-common/util/filter.factory.js"></script>
+    <script src="canvasstrac-client-common/util/query.factory.js"></script>
+    <script src="canvasstrac-client-common/util/resourcelist.factory.js"></script>
+    <script src="canvasstrac-client-common/util/standard-factory.factory.js"></script>
+    <script src="canvasstrac-client-common/util/resource.factory.js"></script>
     <script src="canvasstrac-client-common/util/pager.factory.js"></script>
     <script src="canvasstrac-client-common/util/console.service.js"></script>
+    <script src="canvasstrac-client-common/util/timer.factory.js"></script>
+    <script src="canvasstrac-client-common/util/undo.factory.js"></script>
 
     <!-- login/register functionality -->
     <script src="canvasstrac-client-common/login/auth.factory.js"></script>
@@ -52,16 +59,18 @@
     <script src="canvasstrac-client-common/users/role.factory.js"></script>
     <script src="canvasstrac-client-common/users/user.factory.js"></script>
     <!-- survey functionality -->
-    <script src="canvasstrac-client-common/surveys/anwser.factory.js"></script>
     <script src="canvasstrac-client-common/surveys/question.factory.js"></script>
+    <script src="canvasstrac-client-common/surveys/answer.factory.js"></script>
     <script src="canvasstrac-client-common/surveys/survey.factory.js"></script>
     <!-- elections functionality -->
-    <script src="canvasstrac-client-common/elections/election.factory.js"></script>
     <script src="canvasstrac-client-common/elections/votingsystem.factory.js"></script>
+    <script src="canvasstrac-client-common/elections/election.factory.js"></script>
     <!-- canvass functionality -->
-    <script src="canvasstrac-client-common/canvasses/canvass.factory.js"></script>
     <script src="canvasstrac-client-common/canvasses/canvassresult.factory.js"></script>
+    <script src="canvasstrac-client-common/canvasses/canvass.factory.js"></script>
     <script src="canvasstrac-client-common/canvasses/canvassassignment.factory.js"></script>
+    <!-- message functionality -->
+    <script src="canvasstrac-client-common/message/message.factory.js"></script>
     <!-- maps functionality -->
     <script src="canvasstrac-client-common/geolocation/maps.factory.js"></script>
     <script src="canvasstrac-client-common/geolocation/geocoder.factory.js"></script>
@@ -71,12 +80,15 @@
     <script src="http://maps.google.com/maps/api/js?key=AIzaSyAjG46Ud9q8nx6Uajf4IhnzG0DR3jMovXo"></script>
 
     <script src="util/startapp.factory.js"></script>
+    <script src="util/util.js"></script>
     <script src="nav/nav.service.js"></script>
     <!-- login/register functionality -->
     <script src="login/login.factory.js"></script>
     <script src="login/login.controller.js"></script>
     <!-- home functionality -->
     <script src="home/home.controller.js"></script>
+    <!-- about functionality -->
+    <script src="about/about.controller.js"></script>
     <!-- canvass functionality -->
     <script src="canvasses/canvass.controller.js"></script>
     <script src="canvasses/canvass.list.controller.js"></script>

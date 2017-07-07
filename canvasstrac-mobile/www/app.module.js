@@ -11,8 +11,9 @@ angular.module('canvassTrac', ['ionic', 'ct.config', 'ct.clientCommon', 'ngCordo
       addressesPath = '/addresses',
       canvassPath = '/canvass',
       surveyPath = '/survey',
-      playlistsPath = '/playlists',
       mapPath = '/map',
+      aboutPath = '/about',
+      browserPath = '/browser',
       otherwisePath = appPath + homePath;
 
     $stateProvider
@@ -103,7 +104,18 @@ angular.module('canvassTrac', ['ionic', 'ct.config', 'ct.clientCommon', 'ngCordo
       params: {
         addr: { value: null }
       }
+    })
+
+    .state(STATES.ABOUT, {
+      url: aboutPath,
+      views: {
+        'menuContent': {
+          templateUrl: 'about/about.html',
+          controller: 'AboutController',
+        }
+      }
     });
+
 
     // if none of the above states are matched, use this as the fallback
     $urlRouterProvider.otherwise(otherwisePath);

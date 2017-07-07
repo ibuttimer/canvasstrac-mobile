@@ -1,7 +1,10 @@
 <ion-view view-title="Canvasses">
   <ion-content>
-    <ion-item>
+    <ion-item ng-if="pager.totalItems > 0">
       Please select a canvass to proceed.
+    </ion-item>
+    <ion-item ng-if="pager.totalItems == 0">
+      You currently have no canvass assignment.
     </ion-item>
     <ion-list>
       <ion-item ng-repeat="canvass in pager.pageItems" ng-class="{active: canvass.isSelected}" ng-click="setCanvass(canvass)">

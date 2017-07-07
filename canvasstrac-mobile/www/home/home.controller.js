@@ -9,21 +9,61 @@ angular.module('canvassTrac')
   https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#style-y091
 */
 
-HomeController.$inject = ['$scope', '$ionicModal', '$ionicPopover', '$timeout', '$state', '$ionicSideMenuDelegate',
-  'canvassFactory', 'surveyFactory', 'electionFactory', 'loginFactory',
-  'userFactory', 'addressFactory', 'storeFactory', 'pagerFactory', 'mapsFactory', 'startAppFactory',
-  'STATES', 'RES', 'USER', 'PLATFORM'];
-function HomeController($scope, $ionicModal, $ionicPopover, $timeout, $state, $ionicSideMenuDelegate,
-  canvassFactory, surveyFactory, electionFactory, loginFactory,
-  userFactory, addressFactory, storeFactory, pagerFactory, mapsFactory, startAppFactory,
-  STATES, RES, USER, PLATFORM) {
+HomeController.$inject = ['$scope', '$ionicModal', '$timeout', '$state', '$ionicSideMenuDelegate',
+  'loginFactory', 'authFactory', 'navService', 'miscUtilFactory',
+  'pagerFactory', 'consoleService',
+  'STATES', 'RES', 'USER', 'PLATFORM', 'INPROGRESS'];
+function HomeController($scope, $ionicModal, $timeout, $state, $ionicSideMenuDelegate,
+  loginFactory, authFactory, navService, miscUtilFactory,
+  pagerFactory, consoleService,
+  STATES, RES, USER, PLATFORM, INPROGRESS) {
 
+  var con = consoleService.getLogger('HomeController');
+  
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
   // To listen for when this page is active (for example, to refresh data),
   // listen for the $ionicView.enter event:
-  $scope.$on('$ionicView.enter', function(e) {
-    // noop
+  $scope.$on('$ionicView.enter', function (event, data) {
+    
+    if ($scope.user.authenticated) {
+      var startStage,
+        changedSel = false,
+        canvass;
+
+      if (!loginFactory.STAGES.isProcessStageOrLoggedIn() && $scope.user.fromStore) {
+        // user was authenticated from stored credentials, need to request canvass etc. details
+        startStage = loginFactory.STAGES.USER_DETAILS;
+      } else if (loginFactory.STAGES.isInProcessStage()) {
+        // should be canvass selection stage
+        startStage = loginFactory.STAGES.nextStage();
+      } else if (loginFactory.STAGES.isLoggedIn()) {
+        // changed canvass selection stage
+        startStage = loginFactory.STAGES.REQ_ASSIGNMENT;
+        changedSel = true;
+      }
+      if (startStage) {
+        //loginFactory.initInProgress();
+
+        /* view caching means that when navigating to home, it uses a cached copy of stateParams
+           so any update (like adding a canvassId in the $state.go() in CanvassListController) 
+           isn't seen here, hence the more complicated mechanism used here.
+           Could disable caching on this view but would be a performance hit
+        */
+        if (!changedSel) {
+          canvass = $scope[RES.ACTIVE_CANVASS]._id;
+        }
+        if (!canvass) {
+          // no active canvass, so check of selection
+          canvass = miscUtilFactory.findSelected($scope[RES.CANVASS_LIST]);
+          if (canvass) {
+            canvass = canvass._id;
+          }
+        }
+
+        finishLogin(startStage, canvass);
+      }
+    }
   });
 
   $scope.user = USER;
@@ -38,11 +78,8 @@ function HomeController($scope, $ionicModal, $ionicPopover, $timeout, $state, $i
     scope: $scope
   });
 
-
   $scope.chartLabels = ["Completed", "Pending"];
-  $scope.overallData = [0, 0];
-  $scope.myData = [0, 0];
-  $scope.assignmentCnt = 0;
+  chartData([], $scope);
   $scope.chartOptions = {
     legend: {
       display: true
@@ -50,13 +87,51 @@ function HomeController($scope, $ionicModal, $ionicPopover, $timeout, $state, $i
   };
 
   // just watch the list rather than the whole ResourceList object
-  $scope.$watch('assignedAddr.list', function (newValue, oldValue, scope) {
+  $scope.$watch(RES.ASSIGNED_ADDR + '.list', function (newValue, oldValue, scope) {
+    chartData(newValue, scope);
+  }, true /* objectEquality */);
+
+  // watch for active canvass changes
+  $scope.showCanvassDetails = false;
+  $scope.$watch(RES.ACTIVE_CANVASS + '._id', function (newValue, oldValue, scope) {
+    if (newValue) {
+      scope.showCanvassDetails = true;
+    } else {
+      scope.showCanvassDetails = false;
+    }
+  }, true /* objectEquality */);
+
+  // watch for active canvass changes
+  //$scope.$watch(function () {
+  //  return INPROGRESS;
+  //}, function (newValue, oldValue, scope) {
+
+
+  //  scope.inprogress = newValue;
+  //}, true /* objectEquality */);
+
+
+  navService.registerAppBackButtonAction();
+
+  $scope.errormessage = '';
+
+  // Bindable Members Up Top, https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#style-y033
+  $scope.toggleLeftSideMenu = toggleLeftSideMenu;
+  $scope.getAssignedText = getAssignedText;
+  $scope.formatDate = formatDate;
+
+
+  /* function implementation
+    -------------------------- */
+
+  function chartData(list, scope) {
     var completed = 0,
       pending = 0,
       myCompleted = 0,
       myPending = 0,
       assignmentCnt = 0;
-    newValue.forEach(function (entry) {
+
+    miscUtilFactory.listForEach(list, function (entry) {
       if (entry.canvassResult) {
         ++completed;
       } else {
@@ -74,67 +149,6 @@ function HomeController($scope, $ionicModal, $ionicPopover, $timeout, $state, $i
     scope.overallData = [completed, pending];
     scope.myData = [myCompleted, myPending];
     scope.assignmentCnt = assignmentCnt;
-  }, true);
-
-  // watch for active canvass changes
-  $scope.showCanvassDetails = false;
-  $scope.$watch('activeCanvass._id', function (newValue, oldValue, scope) {
-    scope.showCanvassDetails = (newValue ? true : false);
-  }, true);
-
-  $scope.errormessage = '';
-
-  // Bindable Members Up Top, https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#style-y033
-  $scope.toggleLeftSideMenu = toggleLeftSideMenu;
-  $scope.getAssignedText = getAssignedText;
-  $scope.formatDate = formatDate;
-  //$scope.openPopover = openPopover;
-  //$scope.closePopover = closePopover;
-  //$scope.mapAddr = mapAddr;
-  //$scope.directionsAddr = directionsAddr;
-
-
-  // Create the menu popover that we will use later
-  //$ionicPopover.fromTemplateUrl('canvasses/popover.menu.html', {
-  //  scope: $scope
-  //}).then(function (popover) {
-  //  $scope.popover = popover;
-  //});
-  ////Cleanup the popover when we're done with it!
-  //$scope.$on('$destroy', function () {
-  //  $scope.popover.remove();
-  //});
-
-  /* function implementation
-    -------------------------- */
-
-  function chartData(resList) {
-    var completed = 0,
-      pending = 0,
-      myCompleted = 0,
-      myPending = 0,
-      assignmentCnt = 0;
-    resList.forEachInList(function (entry) {
-
-      console.log(entry);
-
-      if (entry.canvassResult) {
-        ++completed;
-      } else {
-        ++pending;
-      }
-      if (entry.canvasser === USER.id) {
-        ++assignmentCnt;
-        if (entry.canvassResult) {
-          ++myCompleted;
-        } else {
-          ++myPending;
-        }
-      }
-    });
-    $scope.overallData = [completed, pending];
-    $scope.myData = [myCompleted, myPending];
-    $scope.assignmentCnt = assignmentCnt;
   }
 
   function toggleLeftSideMenu () {
@@ -157,16 +171,89 @@ function HomeController($scope, $ionicModal, $ionicPopover, $timeout, $state, $i
     return new Date(date).toDateString();
   }
 
+  // Finish the login after user authenticated from stored credentials
+  function finishLogin(startStage, canvassId) {
 
-  function openPopover ($event, addr) {
-    $scope.address = addr;
-    $scope.popover.show($event);
-  };
+    var options = loginFactory.getLoginOptionObject();
 
-  function closePopover () {
-    $scope.popover.hide();
-  };
+    switch (startStage) {
+      case loginFactory.STAGES.REQ_ASSIGNMENT:
+        // add canvass options
+        options.canvassId = canvassId;
+        // fall thru
+      case loginFactory.STAGES.REQ_CANVASSES:
+        // add user details options
+        options.queryProcess = authFactory.isAuthenticated; // don't proceed unless logged in
+        options.userId = USER.id;
+        // fall thru
+      case loginFactory.STAGES.USER_DETAILS:
+        //options.progressUpdate = function (update, stage) {
+        //  if (stage === loginFactory.STAGES.PROCESS_ASSIGNMENT) {
+        //    $scope.$apply();
+        //  }
+        //};
+        break;
+    }
 
+    // do login starting from user details
+    loginFactory.doLogin(function (stage) {
+      switch (stage) {
+        case loginFactory.STAGES.USER_DETAILS:
+          options.queryProcess = authFactory.isAuthenticated; // don't proceed unless logged in
+          options.userId = USER.id;
+          // default onSuccess & onFailure
+          break;
+        case loginFactory.STAGES.REQ_CANVASSES:
+          options.onSuccess = function (response, list) {
+            // retrieve canvass success
+            var cont = false;
+            switch (list.count) {
+              case 0: // no canvasses
+                shutShop(STATES.HOME);
+                break;
+              case 1:
+                cont = true;
+                options.canvassId = list.getFromList(0)._id;
+                break;
+              default:  // more than one canvasses
+                shutShop(STATES.CANVASSLIST);
+                break;
+            }
+            return cont;
+          };
+          options.onFailure = function (response) {
+            // retrieve canvass failed
+            shutShop(STATES.HOME);
+            return false; // stop processing
+          };
+          break;
+        case loginFactory.STAGES.REQ_ASSIGNMENT:
+        case loginFactory.STAGES.PROCESS_ASSIGNMENT:
+          options.onSuccess = function (response) {
+            // continue processing
+            return true;
+          };
+          break;
+        case loginFactory.STAGES.ASSIGNMENT_PROCESSED:
+          options.onSuccess = function (response) {
+            // process assignment success
+            shutShop(STATES.HOME);
+            return false; // all done
+          };
+          break;
+      }
+      return options;
+    }, startStage);
+  }
+
+
+
+  function shutShop(state) {
+    //loginFactory.initInProgress();
+    navService.go(state, null, null, {
+      historyRoot: true   // The next view should become the root view in its history stack
+    });
+  }
 
 
 }

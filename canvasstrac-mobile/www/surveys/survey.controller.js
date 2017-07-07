@@ -9,13 +9,13 @@ angular.module('canvassTrac')
   https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#style-y091
 */
 
-SurveyController.$inject = ['$scope', '$stateParams', '$state', '$ionicHistory', 'canvassFactory',
+SurveyController.$inject = ['$scope', '$stateParams', '$state', 'canvassFactory',
   'loginFactory', 'userFactory', 'canvassResultFactory', 'storeFactory', 'miscUtilFactory', 'questionFactory',
-  'consoleService',
+  'consoleService', 'navService', 
   'QUESTIONSCHEMA', 'STATES', 'RES', 'USER', 'PLATFORM', 'CANVASSRES_SCHEMA', 'CONFIG'];
-function SurveyController($scope, $stateParams, $state, $ionicHistory, canvassFactory,
+function SurveyController($scope, $stateParams, $state, canvassFactory,
   loginFactory, userFactory, canvassResultFactory, storeFactory, miscUtilFactory, questionFactory,
-  consoleService,
+  consoleService, navService, 
   QUESTIONSCHEMA, STATES, RES, USER, PLATFORM, CANVASSRES_SCHEMA, CONFIG) {
 
   var con = consoleService.getLogger('SurveyController');
@@ -24,8 +24,10 @@ function SurveyController($scope, $stateParams, $state, $ionicHistory, canvassFa
   // when they are recreated or on app start, instead of every page change.
   // To listen for when this page is active (for example, to refresh data),
   // listen for the $ionicView.enter event:
-  //$scope.$on('$ionicView.enter', function(e) {
-  //});
+  $scope.$on('$ionicView.enter', function(event, data) {
+    // noop
+    //navService.dumpHistory('SurveyController'); // just for dev
+  });
 
   $scope.user = USER;
 
@@ -45,6 +47,7 @@ function SurveyController($scope, $stateParams, $state, $ionicHistory, canvassFa
   $scope.moveQuestion = moveQuestion;
   $scope.answerIp = answerIp;
   $scope.submitSurveyResponse = submitSurveyResponse;
+  $scope.cancelSurvey = cancelSurvey;
   if (CONFIG.DEV_MODE) {
     $scope.fakeSurvey = fakeSurvey;
   }
@@ -173,11 +176,10 @@ function SurveyController($scope, $stateParams, $state, $ionicHistory, canvassFa
     $scope.surveyForm.$setUntouched();
     $scope.surveyForm.$setPristine();
 
-    var prev = $ionicHistory.backView();
-    // update previous view's stateParams with the result
-    prev.stateParams.result = result;
-
-    $ionicHistory.goBack();  // go to canvass screen
+    // go to canvass screen & update it's stateParams with the result
+    navService.goBackTo(STATES.CANVASS, {
+      result: result
+      });
   }
 
   function fakeSurvey() {
@@ -198,6 +200,13 @@ function SurveyController($scope, $stateParams, $state, $ionicHistory, canvassFa
         answer.comment = 'fake comment ' + i;
       }
     }
+  }
+
+  function cancelSurvey() {
+    // go to canvass screen & update it's stateParams with the result
+    navService.goBackTo(STATES.CANVASS, {
+      result: undefined
+    });
   }
 }
 

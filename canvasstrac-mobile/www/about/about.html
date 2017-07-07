@@ -1,0 +1,133 @@
+﻿<ion-view view-title="About">
+  <ion-content>
+    <div class="list card">
+      <div class="item item-text-wrap">
+        <h3>Version: {{appversion}}</h3>
+        <h3>&copy; 2016-2017 Ian Buttimer</h3>
+      </div>
+    </div>
+    <div class="list card">
+      <div class="item item-text-wrap">
+        <h3>Overview</h3>
+        <p>This application was developed for the Capstone Project of the <a href="" ng-click="showExternal($event,'https://www.coursera.org/specializations/full-stack')">Full Stack Web Development Specialization</a> set of courses provided by <a href="" ng-click="showExternal($event,'https://www.coursera.org')">coursera</a>.</p>
+        <br>
+        <h3>Functionality</h3>
+        <p>The purpose of the CanvassTrac application suite is to provide an application that may be utilised during elections to allow a campaign to collect and track the results of canvasses.</p>
+        <br>
+        <p>The application suite consists of three individual elements:</p>
+        <ul class="ul-style">
+          <li>A server application</li>
+          <li>A management web application<br>To facilitate the creation and configuration of canvasses and their associated surveys.</li>
+          <li>A mobile client application<br>For the use of canvassers on the ground to collect voter data.</li>
+        </ul>
+        <br>
+        <p>The list of currently supported features of the management web application are as follows:</p>
+        <ul class="ul-style">
+          <li>User login</li>
+          <li>User management<br>Including user creation and control.</li>
+          <li>Canvass configuration<br>Canvasses may be created and configured, allowing the assignment of addresses to individual canvassers.</li>
+          <li>Survey configuration<br>Allowing the configuration of a set of specific questions to gather answers on.</li>
+          <li>Canvass result analysis<br>Providing details of the results collected by the canvassers.</li>
+          <li>Feedback submission</li>
+        </ul>
+        <br>
+        <p>The list of currently supported features of the mobile application are as follows:</p>
+        <ul class="ul-style">
+          <li>User login</li>
+          <li>Download of assigned canvass route and survey information.</li>
+          <li>Mapping service<br>To allow canvassers to quickly and efficiently cover their assigned canvass route.</li>
+          <li>Survey response entry<br>In order to allow the campaign team to accurately monitor campaign progress.</li>
+        </ul>
+      </div>
+    </div>
+     <div class="list card">
+      <div class="item item-divider">
+        Server application
+      </div>
+      <div class="item item-text-wrap">
+        <div class="row">
+          <div class="col">
+            <p>Tech stack</p>
+            <ul class="ul-style">
+              <li>Node.js</li>
+              <li>MongoDB</li>
+              <li>Express</li>
+            </ul>
+          </div>
+          <div class="col">
+            <p>Code</p>
+            <a href="" ng-click="showExternal($event,'https://github.com/ibuttimer/canvasstrac-server')" class="item item-icon-left">
+              <i class="icon ion-social-github"></i>
+              GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="list card">
+      <div class="item item-divider">
+        Management application
+      </div>
+      <div class="item item-text-wrap">
+        <div class="row">
+          <div class="col">
+            <p>Tech stack</p>
+            <ul class="ul-style">
+              <li>AngularJS</li>
+            </ul>
+          </div>
+          <div class="col">
+            <p>Code</p>
+            <a href="" ng-click="showExternal($event,'https://github.com/ibuttimer/canvasstrac-mgmt')" class="item item-icon-left">
+              <i class="icon ion-social-github"></i>
+              GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="list card">
+      <div class="item item-divider">
+        Mobile application
+      </div>
+      <div class="item item-text-wrap">
+        <div class="row">
+          <div class="col">
+            <p>Tech stack</p>
+            <ul class="ul-style">
+              <li>Ionic</li>
+            </ul>
+          </div>
+          <div class="col">
+            <p>Code</p>
+            <a href="" ng-click="showExternal($event,'https://github.com/ibuttimer/canvasstrac-mobile')" class="item item-icon-left">
+              <i class="icon ion-social-github"></i>
+              GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="list card">
+      <div class="item item-text-wrap">
+        <h3>Privacy Policy</h3>
+        <p>The application Privacy Policy may be viewed <a href="" ng-click="showExternal($event,'https://github.com/ibuttimer/canvasstrac-mobile/wiki/CanvassTrac-Privacy-Policy')">on the application wiki</a>.</p>
+      </div>
+    </div>
+
+    <div class="list card">
+      <div class="item item-text-wrap">
+        <h3>Acknowledgements</h3>
+        <p>The following third party resources have been used in this application:</p>
+        <ul class="ul-style">
+          <li><a href="" ng-click="showExternal($event,'https://ionicframework.com/')">Ionic</a></li>
+          <li><a href="" ng-click="showExternal($event,'http://jtblin.github.io/angular-chart.js')">Angular Chart</a></li>
+          <li>Man graphic by <a href="" ng-click="showExternal($event,'http://www.flaticon.com/authors/freepik')">freepik</a> from <a href="" ng-click="showExternal($event,'http://www.flaticon.com/')">Flaticon</a> is licensed under <a href="" ng-click="showExternal($event,'http://creativecommons.org/licenses/by/3.0/')" title="Creative Commons BY 3.0">CC BY 3.0</a>. Made with <a href="" ng-click="showExternal($event,'http://logomakr.com')" title="Logo Maker">Logo Maker</a></li>
+        </ul>
+      </div>
+    </div>
+
+  </ion-content>
+</ion-view>
+

@@ -9,14 +9,14 @@ angular.module('canvassTrac')
   https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#style-y091
 */
 
-CanvassController.$inject = ['$scope', '$ionicModal', '$ionicPopover', '$ionicHistory', '$timeout', '$state',
+CanvassController.$inject = ['$scope', '$ionicModal', '$ionicPopover', '$ionicPopup', '$timeout', '$state',
   'canvassFactory',
   'loginFactory', 'userFactory', 'addressFactory', 'storeFactory', 'pagerFactory', 'mapsFactory', 'startAppFactory',
-  'consoleService', 'navService', 'STATES', 'RES', 'USER'];
-function CanvassController($scope, $ionicModal, $ionicPopover, $ionicHistory, $timeout, $state,
+  'consoleService', 'navService', 'STATES', 'RES', 'USER', 'CONFIG'];
+function CanvassController($scope, $ionicModal, $ionicPopover, $ionicPopup, $timeout, $state,
   canvassFactory,
   loginFactory, userFactory, addressFactory, storeFactory, pagerFactory, mapsFactory, startAppFactory,
-  consoleService, navService, STATES, RES, USER) {
+  consoleService, navService, STATES, RES, USER, CONFIG) {
 
   var con = consoleService.getLogger('CanvassController');
 
@@ -24,15 +24,9 @@ function CanvassController($scope, $ionicModal, $ionicPopover, $ionicHistory, $t
   // when they are recreated or on app start, instead of every page change.
   // To listen for when this page is active (for example, to refresh data),
   // listen for the $ionicView.enter event:
-  $scope.$on('$ionicView.enter', function(e) {
-
-    navService.dumpHistory();
-
-    //var xx = $ionicHistory.viewHistory();
-
-    //$ionicHistory.clearHistory();  // clear prev history
-
-    //xx = $ionicHistory.viewHistory();
+  $scope.$on('$ionicView.enter', function (event, data) {
+    // noop
+    //navService.dumpHistory('CanvassController');  // just for dev
   });
 
   $scope.user = USER;
@@ -73,56 +67,46 @@ function CanvassController($scope, $ionicModal, $ionicPopover, $ionicHistory, $t
   /* function implementation
     -------------------------- */
 
-  //function setFilter (id, filter, resList) {
-  //  // allocatedAddrFilterStr or allocatedCanvasserFilterStr
-  //  var filterStr = RES.getFilterStrName(id);
-  //  if (!filter) {
-  //    filter = resList.factory.newFilter();
-  //  }
-  //  $scope[filterStr] = filter.toString();
-
-  //  return resList.factory.setFilter(id, filter);
-  //}
-
   function openPopover ($event, addr) {
     $scope.address = addr;
-    $scope.popover.show($event);
+
+    $scope.popup = $ionicPopup.show({
+      templateUrl: 'canvasses/popover.menu.html',
+      title: 'Select Action',
+      scope: $scope,
+      buttons: []
+    });
+
+    //$scope.popover.show($event);
   };
 
   function closePopover () {
-    $scope.popover.hide();
+    $scope.popup.close(); //close the popup
+    //$scope.popover.hide();
   };
 
-  function mapAddr () {
+  function devModeAddr() {
+    // HACK address
+    if (CONFIG.DEV_MODE && CONFIG.DEV_ADDR) {
+      $scope.address = CONFIG.DEV_ADDR;
+    }
+  }
+
+  function mapAddr() {
     $scope.closePopover();
 
-    // HACK address
-    $scope.address = {
-      addrLine1: '1 Westbrook Avenue',
-      town: 'Balbriggan',
-      county: 'Co. Dublin'
-    };
+    // special dev mode handling
+    devModeAddr();
 
-    $state.go(STATES.MAP, {addr: $scope.address});
+    navService.go(STATES.MAP, { addr: $scope.address });
   }
 
-
-  function directionsWeb() {
-    // use google maps website
-    // see https://github.com/apache/cordova-plugin-inappbrowser#reference
-    var url = mapsFactory.getNavigationUrl($scope.address);
-    cordova.InAppBrowser.open(url, '_blank', 'location=yes');
-  }
 
   function directionsAddr () {
-    // HACK address
-    $scope.address = {
-      addrLine1: '1 Westbrook Avenue',
-      town: 'Balbriggan',
-      county: 'Co. Dublin'
-    };
-
     $scope.closePopover();
+
+    // special dev mode handling
+    devModeAddr();
 
     startAppFactory.hasGoogleMapsApp(
       // success function - have google maps app
@@ -141,13 +125,18 @@ function CanvassController($scope, $ionicModal, $ionicPopover, $ionicHistory, $t
       function () {
         directionsWeb();
       });
+  }
 
-
+  function directionsWeb() {
+    // use google maps website
+    // see https://github.com/apache/cordova-plugin-inappbrowser#reference
+    var url = mapsFactory.getNavigationUrl($scope.address);
+    cordova.InAppBrowser.open(url, '_blank', 'location=yes');
   }
 
   function canvassAddr() {
     $scope.closePopover();
-    $state.go(STATES.CANVASS, {addr: $scope.address});
+    navService.go(STATES.CANVASS, { addr: $scope.address });
   }
 
 

@@ -45,10 +45,13 @@
           </div>
         </div>
 
-        <div>
-          <p align="center">
+        <div class="row">
+          <div class="col" align="center">
+            <input type="button" value="Cancel" class="button button-assertive" ng-click="cancelSurvey()">
+          </div>
+          <div class="col" align="center">
             <input type="submit" value="Save" class="button button-positive" ng-disabled="!answeredAll" ng-click="submitSurveyResponse('save')">
-          </p>
+          </div>
         </div>
         <div ng-if="devmode">
           <p align="center">
