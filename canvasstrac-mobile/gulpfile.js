@@ -9,7 +9,17 @@ var gulp = require('gulp'),
   sh = require('shelljs'),
   replace = require('gulp-replace-task'),
   argv = require('yargs')
-    .usage('Usage: $0 -production')
+    .usage('Usage: gulp <command> [options]')
+    .command('replace', 'Generate the environment file based on the options from a configuration file')
+    .command('sass', 'Run Sass stylesheet preprocessor')
+    .option('e', {
+      alias: 'env',
+      default: 'localdev',
+      describe: 'Specify name of configuration file to use',
+      type: 'string'
+    })
+    .help('h')
+    .alias('h', 'help')
     .argv,
     production = argv.production,
   fs = require('fs'),
@@ -24,6 +34,7 @@ var paths = {
   },
   environment = {};
 
+/* read local environment configuration if it exists */
 if (fs.existsSync('.env')) {
   environment = JSON.parse(fs.readFileSync('.env', 'utf8'));
 }
@@ -54,7 +65,7 @@ gulp.task('replace', function () {
       { prop: 'httpsPortOffset', type: 'num' },
       { prop: 'socketTimeout', type: 'num' },
       { prop: 'disableAuth', type: 'bool', dflt: false },
-      // management app settings
+      // client app settings
       { prop: 'mapsApiKey', type: 'str' },
       { prop: 'autoLogout', type: 'num|str' },
       { prop: 'autoLogoutCount', type: 'num|str' },

@@ -64,6 +64,12 @@ The json config file should have the following format
   "DEV_PASSWORD2": "<<password for user 2 to use for quick login in development mode>>"
   "DEV_USER3": "<<username for user 3 to use for quick login in development mode>>",
   "DEV_PASSWORD3": "<<password for user 3 to use for quick login in development mode>>"
+  "DEV_ADDR": address to use for geolocation testing during development, a json object 
+              with the same properties as the address model, e.g.
+              { "addrLine1": "1 Somewhere Avenue",
+                "town": "Somewhere town",
+                "county": "Somewhere County"
+              }
 
   // see dbgFlags.txt for list of debug flag names
   // values are true to enable debug output, false otherwise

@@ -20,7 +20,7 @@ To learn more about Tools for Apache Cordova, visit this [link](https://taco.vis
 ## Getting Started
 
 With VS Code:
-* Clone this repository.
+* Clone this repository (https://github.com/ibuttimer/canvasstrac-mobile).
 * Run `npm install` from the project root.
 * Run `bower install` from the project root.
 * Add android / iOS / windows platform to your project by running `ionic platform add <platform name>` in a terminal from your project root.
@@ -33,7 +33,7 @@ With VS Code:
 > ext install cordova-tools
 
 With Visual Studio:
-* Clone this repository.
+* Clone this repository (https://github.com/ibuttimer/canvasstrac-mobile).
 * Open the ionic-typescript-blank.sln in Visual Studio.
 * Open Task Runner window by pressing Ctrl+Alt+Bkspce. 
 ** Note: It is important that the task runner window be open in VS while building the project. You can also use "gulp watch" task to enable live reload in browser based debugging scenarios.    
