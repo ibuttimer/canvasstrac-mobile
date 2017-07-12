@@ -69,7 +69,11 @@ function AboutController($scope, $rootScope, $cordovaInAppBrowser, $ionicPopover
   function showExternal($event, url) {
 
     if (SETTINGS.allowBrowser) {
-      $cordovaInAppBrowser.open(url, '_blank', {
+      var target = '_blank';  // open in the InAppBrowser
+      //'_self';    // opens in the Cordova WebView if the URL is in the white list, otherwise it opens in the InAppBrowser.
+      //'_system';  // opens in the system's web browser.
+
+      $cordovaInAppBrowser.open(url, target, {
         location: 'yes'
       });
 

@@ -43,8 +43,6 @@ function HomeController($scope, $ionicModal, $timeout, $state, $ionicSideMenuDel
         changedSel = true;
       }
       if (startStage) {
-        //loginFactory.initInProgress();
-
         /* view caching means that when navigating to home, it uses a cached copy of stateParams
            so any update (like adding a canvassId in the $state.go() in CanvassListController) 
            isn't seen here, hence the more complicated mechanism used here.
@@ -249,7 +247,6 @@ function HomeController($scope, $ionicModal, $timeout, $state, $ionicSideMenuDel
 
 
   function shutShop(state) {
-    //loginFactory.initInProgress();
     navService.go(state, null, null, {
       historyRoot: true   // The next view should become the root view in its history stack
     });

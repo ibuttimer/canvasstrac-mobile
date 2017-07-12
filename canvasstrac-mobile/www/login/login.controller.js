@@ -1,4 +1,4 @@
-/*jslint node: true */
+﻿/*jslint node: true */
 'use strict';
 
 angular.module('canvassTrac')
@@ -75,7 +75,7 @@ function LoginController($scope, $ionicModal, $timeout, $state, authFactory,
   // To listen for when this page is active (for example, to refresh data),
   // listen for the $ionicView.enter event:
   $scope.$on('$ionicView.enter', function (event, data) {
-    //loginFactory.initInProgress();
+    //noop
   });
 
   // Form data for the login modal
@@ -141,7 +141,6 @@ function LoginController($scope, $ionicModal, $timeout, $state, authFactory,
       $scope.loginForm.$setUntouched();
       $scope.loginForm.$setPristine();
     }
-    //loginFactory.initInProgress();
   }
 
   function shutShop(state, params) {
@@ -159,7 +158,8 @@ function LoginController($scope, $ionicModal, $timeout, $state, authFactory,
     // reset form as we leave
     tidyUp();
     $scope.modal.hide();
-
+    loginFactory.clrErrorMsg();
+  
     deregisterBackButtonAction();
   }
 

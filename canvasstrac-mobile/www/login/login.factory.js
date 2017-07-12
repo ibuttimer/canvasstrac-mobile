@@ -61,6 +61,7 @@ function loginFactory($injector, $q, $timeout, authFactory, canvassFactory, surv
       doLoginFromStage: doLoginFromStage,
       getLoginOptionObject: getLoginOptionObject,
       //updateInProgress: updateInProgress,
+      clrErrorMsg: clrErrorMsg,
       //setErrorMsg: setErrorMsg,
       //initInProgress: initInProgress,
       STAGES: {
@@ -300,7 +301,6 @@ function loginFactory($injector, $q, $timeout, authFactory, canvassFactory, surv
    */
   function doLogout(success, failure) {
     initInProgress(LOGGED_OUT, 'doLogout');
-    //INPROGRESS.stage = LOGGED_OUT;
     clearData();
     authFactory.logout(success, failure);
   }
@@ -601,6 +601,10 @@ function loginFactory($injector, $q, $timeout, authFactory, canvassFactory, surv
       con.debug('progress update ['+ dbg+']: ' + INPROGRESS.stage + ' ' + INPROGRESS.active + ' ' + INPROGRESS.progressmsg);
     }, 0);
 
+  }
+
+  function clrErrorMsg() {
+    INPROGRESS.errormessage = '';
   }
 
   function setErrorMsg(response, stage, dbg) {
