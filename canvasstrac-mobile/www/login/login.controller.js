@@ -209,17 +209,17 @@ function LoginController($scope, $ionicModal, $timeout, $state, authFactory,
         case loginFactory.STAGES.REQ_CANVASSES:
           options.onSuccess = function (response, list) {
             // retrieve canvass success
-            var cont = false;
+            var cont = true;
             switch (list.count) {
               case 0: // no canvasses
                 shutShop(STATES.HOME, { canvasses: 0 });
                 break;
               case 1:
-                cont = true;
                 options.canvassId = list.getFromList(0)._id;
                 break;
               default:  // more than one canvasses
                 shutShop(STATES.CANVASSLIST);
+                cont = false; // can't process any more atm
                 break;
             }
             return cont;

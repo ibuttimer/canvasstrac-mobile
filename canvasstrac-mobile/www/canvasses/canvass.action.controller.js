@@ -154,6 +154,8 @@ function CanvassActionController($scope, $state, $stateParams, $ionicNavBarDeleg
       $scope.surveyPrompt = 'Survey';
     }
     setBackCtrl($scope.result);
+
+    $scope.canSurvey = ($scope[RES.SURVEY_QUESTIONS].count > 0);
   }
 
 

@@ -69,6 +69,7 @@ function CanvassController($scope, $ionicModal, $ionicPopover, $ionicPopup, $tim
 
   function openPopover ($event, addr) {
     $scope.address = addr;
+    $scope.canCanvass = ($scope[RES.ACTIVE_SURVEY]._id !== undefined);
 
     $scope.popup = $ionicPopup.show({
       templateUrl: 'canvasses/popover.menu.html',

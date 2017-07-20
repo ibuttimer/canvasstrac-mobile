@@ -34,7 +34,7 @@
         </div>
       </div>
 
-      <ion-item ng-click="surveyAddr()">
+      <ion-item ng-click="surveyAddr()" ng-if="canSurvey">
         <div class="item item-icon-left"><i class="icon ion-android-chat"></i>{{surveyPrompt}}</div>
       </ion-item>
     </ion-content>

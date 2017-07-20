@@ -4,7 +4,7 @@ Mobile client application for CanvassTrac suite
 ## Development Environment
 The development environment:
 * Visual Studio Community 2017 with Visual Studio Tools for Apache Cordova
-* Nodejs v6.10.1
+* Node.js v6.11.1
 * npm v2.15.9
 * bower v1.7.9
 * gulp v3.9.1

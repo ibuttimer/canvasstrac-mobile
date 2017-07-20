@@ -33,14 +33,14 @@ angular.module('ct.config', [])
     };
   })())
   .constant('CONFIG', (function () {
-	  var strDevAddr = '@@DEV_ADDR',
-	    devAddr;
-	  if (strDevAddr) {
-      devAddr = JSON.parse(strDevAddr);
-      if (Object.getOwnPropertyNames(devAddr).length === 0) {
-        devAddr = undefined;
+      var strDevAddr = '@@DEV_ADDR',
+        devAddr;
+      if (strDevAddr) {
+        devAddr = JSON.parse(strDevAddr);
+        if (Object.getOwnPropertyNames(devAddr).length === 0) {
+          devAddr = undefined;
+        }
       }
-	  }
 
     return {
       DEV_MODE: @@DEV_MODE,  // flag to enable dev mode hack/shortcuts etc.
@@ -50,7 +50,7 @@ angular.module('ct.config', [])
       DEV_PASSWORD2: '@@DEV_PASSWORD2',
       DEV_USER3: '@@DEV_USER3',
       DEV_PASSWORD3: '@@DEV_PASSWORD3',
-	    DEV_ADDR: devAddr,
+      DEV_ADDR: devAddr,
       NOAUTH: @@disableAuth,
       MAPSAPIKEY: '@@mapsApiKey',
       AUTOLOGOUT: @@autoLogout,

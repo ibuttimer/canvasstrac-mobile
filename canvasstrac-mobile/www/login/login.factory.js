@@ -497,8 +497,9 @@ function loginFactory($injector, $q, $timeout, authFactory, canvassFactory, surv
             queryProcess,
             function (response) {   // onSuccess
               // retrieve canvass success
-              onSuccess(response, resolve, reject, REQ_ASSIGNMENT, 
-                          canvassFactory.getObj(RES.CANVASS_LIST));
+              var canvasses = canvassFactory.getObj(RES.CANVASS_LIST),
+                nextStage = (canvasses.count > 0 ? REQ_ASSIGNMENT : ASSIGNMENT_PROCESSED);
+              onSuccess(response, resolve, reject, nextStage, canvasses);
             },
             function (response) {
               // retrieve canvass failed
