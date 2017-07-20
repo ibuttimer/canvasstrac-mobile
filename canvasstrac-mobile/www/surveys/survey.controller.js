@@ -79,8 +79,23 @@ function SurveyController($scope, $stateParams, $state, canvassFactory,
         $scope.answers[$scope.quesNum] = $scope.answer;
       }
 
-      $scope.question = $scope[RES.SURVEY_QUESTIONS].getFromList(num);
-      $scope.quesParam = getQuestionParam($scope.question.type);
+      var question = $scope[RES.SURVEY_QUESTIONS].getFromList(num),
+        quesParam = getQuestionParam(question.type),
+        options;
+      if (quesParam.showRanking) {
+        options = [];
+        question.options.forEach(function (opt) {
+          options.push({
+            text: opt,
+            isSelected: false
+          });
+        });
+      }
+
+
+      $scope.question = question;
+      $scope.quesParam = quesParam;
+      $scope.options = options;
       $scope.quesNum = num;
 
       $scope.answer = $scope.answers[num];
@@ -115,6 +130,11 @@ function SurveyController($scope, $stateParams, $state, canvassFactory,
     } else if ($scope.quesParam.showRanking) {
       if ($scope.answer.rank) {
         $scope.answered = true;
+
+        $scope.options.forEach(function (opt) {
+          opt.isSelected = false;
+        });
+        $scope.options[$scope.answer.rank - $scope.question.rangeMin].isSelected = true;
       }
     } else if ($scope.quesParam.showTextInput) {
       if ($scope.answer.comment) {

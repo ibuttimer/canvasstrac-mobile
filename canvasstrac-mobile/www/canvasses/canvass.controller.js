@@ -79,12 +79,12 @@ function CanvassController($scope, $ionicModal, $ionicPopover, $ionicPopup, $tim
     });
 
     //$scope.popover.show($event);
-  };
+  }
 
   function closePopover () {
     $scope.popup.close(); //close the popup
     //$scope.popover.hide();
-  };
+  }
 
   function devModeAddr() {
     // HACK address

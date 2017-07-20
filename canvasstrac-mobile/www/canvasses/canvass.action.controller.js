@@ -174,7 +174,7 @@ function CanvassActionController($scope, $state, $stateParams, $ionicNavBarDeleg
     } else if (result) {
       quickRspProps.forEach(function (prop) {
         if (result.hasOwnProperty(prop.prop)) {
-          if (result[prop.prop] != prop.dflt) {
+          if (result[prop.prop] !== prop.dflt) {
             transformed = prop.transform;
           }
         }

@@ -29,7 +29,7 @@
         </div>
         <div class="card" ng-if="quesParam.showRanking">
           <div class="row">
-            <div class="col" ng-repeat="opt in question.options" ng-if="opt">{{opt}}</div>
+            <div class="col text-center" ng-repeat="opt in options track by $index" ng-if="opt" ng-class="{'option-box': opt.isSelected}" >{{opt.text}}</div>
           </div>
           <div class="item range">
             <input type="range" name="ranking" min="{{question.rangeMin}}" max="{{question.rangeMax}}" ng-change="answerIp()" ng-model="answer.rank">
@@ -60,10 +60,5 @@
         </div>
       </ion-content>
     </form>
-  <!--<div>
-    <p align="center" ng-if="devmode">
-      <button class="button button-block button-warning" ng-click="fakeSurvey()">Fake survey</button>
-    </p>
-  </div>-->
 </ion-view>
 

@@ -7,12 +7,12 @@ angular.module('canvassTrac')
 
   .directive('logIn', function() {
     return {
-      link: function($scope, element) {
-        element.on('click', function() {
+      link: function ($scope, element) {
+        element.on('click', function () {
           $scope.login();
         });
       }
-    }
+    };
   })
 
   .directive('logOut', function () {
@@ -22,7 +22,7 @@ angular.module('canvassTrac')
           $scope.doLogout();
         });
       }
-    }
+    };
   })
 
   .directive('devDbg', function () {
@@ -32,7 +32,7 @@ angular.module('canvassTrac')
           $scope.doDevDbg();
         });
       }
-    }
+    };
   })
 
   .value('SHOWDEVDBG', false)

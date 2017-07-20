@@ -121,7 +121,7 @@ angular.module('ct.config', [])
       dbgLoginController: @@LoginController,
       dbgloginFactory: @@loginFactory,
       dbgHomeController: @@HomeController,
-      dbgnavService: @@navService,
+      dbgnavService: @@navService
     };
 
     // TODO needs to be updated to something like the mgmt apps way of doing this but just wedge in for now

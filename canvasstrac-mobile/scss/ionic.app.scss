@@ -1,4 +1,4 @@
-/// <reference path="www/lib/ionic/scss/_variables.scss" />
+﻿/// <reference path="www/lib/ionic/scss/_variables.scss" />
 
 /*
 To customize the look and feel of Ionic, you can override the variables
@@ -23,7 +23,9 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 // Include all of Ionic
 @import "www/lib/ionic/scss/ionic";
 
-$lime:                           #00ff00 !default;
+$lime:    #00ff00 !default;
+$lt_blue: #b6d0fb !default;
+$lt_orange: #fff2e6 !default;
 
 
 .center-form {
@@ -59,6 +61,15 @@ $lime:                           #00ff00 !default;
 		color: white;
 		margin: 0px;
 	}
+}
+
+.option-box {
+  background-color: $lt_orange;
+
+  p {
+    color: white;
+    margin: 0px;
+  }
 }
 
 .progress-box {

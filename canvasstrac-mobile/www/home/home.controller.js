@@ -178,12 +178,12 @@ function HomeController($scope, $ionicModal, $timeout, $state, $ionicSideMenuDel
       case loginFactory.STAGES.REQ_ASSIGNMENT:
         // add canvass options
         options.canvassId = canvassId;
-        // fall thru
+        /* fall through */
       case loginFactory.STAGES.REQ_CANVASSES:
         // add user details options
         options.queryProcess = authFactory.isAuthenticated; // don't proceed unless logged in
         options.userId = USER.id;
-        // fall thru
+        /* fall through */
       case loginFactory.STAGES.USER_DETAILS:
         //options.progressUpdate = function (update, stage) {
         //  if (stage === loginFactory.STAGES.PROCESS_ASSIGNMENT) {
