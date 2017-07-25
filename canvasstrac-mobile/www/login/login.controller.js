@@ -63,9 +63,9 @@ angular.module('canvassTrac')
 */
 
 LoginController.$inject = ['$scope', '$ionicModal', '$timeout', '$state', 'authFactory', 
-  'loginFactory', 'consoleService', 'navService', 'STATES', 'RES', 'USER', 'CONFIG', 'SHOWDEVDBG', 'BACK_PRIORITY'];
+  'loginFactory', 'consoleService', 'navService', 'noticeFactory', 'STATES', 'RES', 'USER', 'CONFIG', 'SHOWDEVDBG', 'BACK_PRIORITY'];
 function LoginController($scope, $ionicModal, $timeout, $state, authFactory, 
-  loginFactory, consoleService, navService, STATES, RES, USER, CONFIG, SHOWDEVDBG, BACK_PRIORITY) {
+  loginFactory, consoleService, navService, noticeFactory, STATES, RES, USER, CONFIG, SHOWDEVDBG, BACK_PRIORITY) {
 
   var con = consoleService.getLogger('LoginController'),
     backButtonActionCtrl;
@@ -102,6 +102,7 @@ function LoginController($scope, $ionicModal, $timeout, $state, authFactory,
   $scope.homeUrl = $state.href(STATES.HOME);
   $scope.canvassesUrl = $state.href(STATES.CANVASSLIST);
   $scope.addressUrl = $state.href(STATES.ADDRESSLIST);
+  $scope.noticesUrl = $state.href(STATES.NOTICES);
   $scope.aboutUrl = $state.href(STATES.ABOUT);
 
   $scope.showAddressItem = false;
@@ -115,6 +116,20 @@ function LoginController($scope, $ionicModal, $timeout, $state, authFactory,
   $scope.$watch(RES.CANVASS_LIST + '.count', function (newValue, oldValue, scope) {
     scope.showCanvassesItem = scope.user.authenticated && (newValue > 0);
   }, true);
+
+  $scope.noticeCount = noticeFactory.get('count',
+    // success function
+    function (response) {
+      // response is actual data
+      $scope.noticeCount = response.count;
+    },
+    // error function
+    function (response) {
+      // noop
+    }
+  );
+
+
 
   // Bindable Members Up Top, https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#style-y033
   $scope.doLogin = doLogin;

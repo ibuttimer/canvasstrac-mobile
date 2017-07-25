@@ -29,6 +29,7 @@ angular.module('ct.config', [])
       CANVASS: 'app.canvass',
       SURVEY: 'app.survey',
       MAP: 'app.map',
+      NOTICES: 'app.notices',
       ABOUT: 'app.about'
     };
   })())

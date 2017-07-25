@@ -23,44 +23,57 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 // Include all of Ionic
 @import "www/lib/ionic/scss/ionic";
 
+@import "www/lib/font-awesome/scss/font-awesome";
+
+
 $lime:    #00ff00 !default;
 $lt_blue: #b6d0fb !default;
 $lt_orange: #fff2e6 !default;
 
+// Bootstrap background colours, copied from bootstrap.css
+$bg-primary:  #337ab7 !default;
+$bg-success:  #dff0d8 !default;
+$bg-info:     #d9edf7 !default;
+$bg-warning:  #fcf8e3 !default;
+$bg-danger:   #f2dede !default;
+
 
 .center-form {
-	width: 290px;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	label{
-		background-color: rgba(255,255,255,0.7);
-		border-color: rgba(255,255,255,0);
-		&.top-input {
-			border-radius: 4px 4px 0px 0px;
-		}
-		
-		&.bottom-input {
-			border-radius: 0px 0px 4px 4px;
-		}
-		
-	}
-	.button-positive {
-		opacity: 0.9;
-	}
-	
+  width: 290px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  label {
+    background-color: rgba(255,255,255,0.7);
+    border-color: rgba(255,255,255,0);
+
+    &.top-input {
+      border-radius: 4px 4px 0px 0px;
+    }
+
+    &.bottom-input {
+      border-radius: 0px 0px 4px 4px;
+    }
+  }
+
+  .button-positive {
+    opacity: 0.9;
+  }
 }
+
 .error-box {
-	padding: 10px;
-	border: 4px solid darken($assertive, 10%);
-	background-color: $assertive;
-	border-radius: 4px;
-	margin: 10px;
-	p{
-		color: white;
-		margin: 0px;
-	}
+  padding: 10px;
+  border: 4px solid darken($assertive, 10%);
+  background-color: $assertive;
+  border-radius: 4px;
+  margin: 10px;
+
+  p {
+    color: white;
+    margin: 0px;
+  }
 }
 
 .option-box {
@@ -73,33 +86,51 @@ $lt_orange: #fff2e6 !default;
 }
 
 .progress-box {
-	padding: 10px;
-	border: 4px solid $lime;
-	border-radius: 4px;
-	margin: 10px;
+  padding: 10px;
+  border: 4px solid $lime;
+  border-radius: 4px;
+  margin: 10px;
 }
 
+
+.card-bg-primary .item {
+  background: $bg-primary;
+}
+.card-bg-success .item {
+  background: $bg-success;
+}
+.card-bg-info .item {
+  background: $bg-info;
+}
+.card-bg-warning .item {
+  background: $bg-warning;
+}
+.card-bg-danger .item {
+  background: $bg-danger;
+}
 
 .scroll {
   height: 100%;
 }
- 
+
 #map {
   width: 100%;
   height: 100%;
 }
 
 .alignleft {
-	float: left;
+  float: left;
 }
+
 .alignright {
-	float: right;
+  float: right;
 }
 
 .canvass-element-table {
   table {
     table-layout: auto;
   }
+
   td {
     word-wrap: break-word
   }
@@ -110,9 +141,10 @@ $lt_orange: #fff2e6 !default;
 .ul-style {
   list-style-type: square;
 }
+
 .ul-style li {
-    // copied from ionic.css .item p
-    color: #666;
-    font-size: 14px;
-    margin-bottom: 2px;
+  // copied from ionic.css .item p
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 2px;
 }

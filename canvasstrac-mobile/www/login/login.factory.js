@@ -60,10 +60,10 @@ function loginFactory($injector, $q, $timeout, authFactory, canvassFactory, surv
       doLogin: doLogin,
       doLoginFromStage: doLoginFromStage,
       getLoginOptionObject: getLoginOptionObject,
-      //updateInProgress: updateInProgress,
+      updateInProgress: updateInProgress,
       clrErrorMsg: clrErrorMsg,
-      //setErrorMsg: setErrorMsg,
-      //initInProgress: initInProgress,
+      setErrorMsg: setErrorMsg,
+      initInProgress: initInProgress,
       STAGES: {
         LOGGED_OUT: LOGGED_OUT,
         LOGIN: LOGIN,
@@ -585,12 +585,19 @@ function loginFactory($injector, $q, $timeout, authFactory, canvassFactory, surv
     }
   }
 
+  /**
+   * Update the in progress status
+   * @param {string} update   Update message
+   * @param {number} stage    Current stage
+   * @param {string} dbg      Debug tag
+   */
   function updateInProgress(update, stage, dbg) {
 
     $timeout(function() {
       if (update) {
         INPROGRESS.active = true;
         INPROGRESS.progressmsg = update;
+        clrErrorMsg();
       } else {
         INPROGRESS.active = false;
         INPROGRESS.progressmsg = '';
@@ -608,15 +615,26 @@ function loginFactory($injector, $q, $timeout, authFactory, canvassFactory, surv
     INPROGRESS.errormessage = '';
   }
 
+  /**
+   * The in progress error status
+   * @param {object} response Server response
+   * @param {number} stage    Current stage
+   * @param {string} dbg      Debug tag
+   */
   function setErrorMsg(response, stage, dbg) {
     updateInProgress('', stage, dbg);
     if (response) {
       INPROGRESS.errormessage = utilFactory.getErrorMsg(response);
     } else {
-      INPROGRESS.errormessage = '';
+      clrErrorMsg();
     }
   }
 
+  /**
+   * Initinalise the in progress error status
+   * @param {number} stage    Current stage
+   * @param {string} dbg      Debug tag
+   */
   function initInProgress(stage, dbg) {
     if (typeof stage === 'string') {
       dbg = stage;

@@ -1,6 +1,9 @@
-<ion-view view-title="Home">
+﻿<ion-view view-title="Home">
   <ion-content>
     <div ng-if="!user.authenticated">
+      <!-- include any notices-->
+      <div ng-include="'notices/notices.list.html'"></div>
+
       <div class="card">
         <div class="item item-thumbnail-left item-text-wrap">
           <img src="img/logo.png" width="125" height="125">

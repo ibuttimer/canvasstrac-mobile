@@ -1,4 +1,4 @@
-<ion-side-menus enable-menu-with-back-views="false">
+﻿<ion-side-menus enable-menu-with-back-views="false">
   <ion-side-menu-content>
     <ion-nav-bar class="bar-stable">
       <ion-nav-back-button>
@@ -39,6 +39,10 @@
           <ion-item menu-close class="item item-icon-left" ng-if="showAddressItem" href="{{addressUrl}}">
             <i class="icon ion-android-list"></i>
             Addresses
+          </ion-item>
+          <ion-item menu-close class="item item-icon-left" ng-if="noticeCount > 0" href="{{noticesUrl}}">
+            <i class="icon ion-android-mail"></i>
+            Notices
           </ion-item>
           <ion-item menu-close class="item item-icon-left" href="{{aboutUrl}}">
             <i class="icon ion-information-circled"></i>

@@ -35,5 +35,13 @@ The application configuration may be set as follows:
 
 See [https://taco.visualstudio.com/en-us/docs/tutorial-package-publish-readme/](https://taco.visualstudio.com/en-us/docs/tutorial-package-publish-readme/) for information regarding making a release for the Play Store.
 
+### Developer notes
+Some miscellaneous developer notes:
+* Adding font-awsome
 
+  Combination of the following:
+  
+  http://robferguson.org/2015/01/06/add-font-awesome-to-your-ionic-project/ to add the icons
 
+  https://www.thepolyglotdeveloper.com/2014/10/use-font-awesome-glyph-icons-ionicframework/ to get rid of the missing font errors
+  

@@ -11,11 +11,11 @@ angular.module('canvassTrac')
 
 HomeController.$inject = ['$scope', '$ionicModal', '$timeout', '$state', '$ionicSideMenuDelegate',
   'loginFactory', 'authFactory', 'navService', 'miscUtilFactory',
-  'pagerFactory', 'consoleService',
+  'pagerFactory', 'consoleService', 'noticeFactory',
   'STATES', 'RES', 'USER', 'PLATFORM', 'INPROGRESS'];
 function HomeController($scope, $ionicModal, $timeout, $state, $ionicSideMenuDelegate,
   loginFactory, authFactory, navService, miscUtilFactory,
-  pagerFactory, consoleService,
+  pagerFactory, consoleService, noticeFactory,
   STATES, RES, USER, PLATFORM, INPROGRESS) {
 
   var con = consoleService.getLogger('HomeController');
@@ -99,24 +99,18 @@ function HomeController($scope, $ionicModal, $timeout, $state, $ionicSideMenuDel
     }
   }, true /* objectEquality */);
 
-  // watch for active canvass changes
-  //$scope.$watch(function () {
-  //  return INPROGRESS;
-  //}, function (newValue, oldValue, scope) {
-
-
-  //  scope.inprogress = newValue;
-  //}, true /* objectEquality */);
-
 
   navService.registerAppBackButtonAction();
 
   $scope.errormessage = '';
+  getNotices();
 
   // Bindable Members Up Top, https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#style-y033
   $scope.toggleLeftSideMenu = toggleLeftSideMenu;
   $scope.getAssignedText = getAssignedText;
   $scope.formatDate = formatDate;
+  $scope.levelToStyle = levelToStyle;
+  $scope.levelToIcon = levelToIcon;
 
 
   /* function implementation
@@ -185,11 +179,6 @@ function HomeController($scope, $ionicModal, $timeout, $state, $ionicSideMenuDel
         options.userId = USER.id;
         /* fall through */
       case loginFactory.STAGES.USER_DETAILS:
-        //options.progressUpdate = function (update, stage) {
-        //  if (stage === loginFactory.STAGES.PROCESS_ASSIGNMENT) {
-        //    $scope.$apply();
-        //  }
-        //};
         break;
     }
 
@@ -245,6 +234,19 @@ function HomeController($scope, $ionicModal, $timeout, $state, $ionicSideMenuDel
   }
 
 
+  function getNotices() {
+    $scope.notices = noticeFactory.query('current',
+      // success function
+      function (response) {
+        // response is actual data
+        $scope.notices = response;
+      },
+      // error function
+      function (response) {
+        // noop
+      }
+    );
+  }
 
   function shutShop(state) {
     navService.go(state, null, null, {
@@ -252,6 +254,14 @@ function HomeController($scope, $ionicModal, $timeout, $state, $ionicSideMenuDel
     });
   }
 
+  function levelToStyle(level) {
+    /* need to use custom .card classes rather as the bootstrap background colours are overwritten */
+    return 'card-' + noticeFactory.getNoticeTypeObj(level, 'style');
+  }
+
+  function levelToIcon(level) {
+    return noticeFactory.getNoticeTypeObj(level, 'icon');
+  }
 
 }
 
