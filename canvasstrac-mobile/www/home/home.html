@@ -8,11 +8,11 @@
         <div class="item item-thumbnail-left item-text-wrap">
           <img src="img/logo.png" width="125" height="125">
           <h2>CanvassTrac</h2>
+          <button class="button button-block button-positive icon-left ion-log-in" ng-click="toggleLeftSideMenu()">
+            Login
+          </button>
         </div>
       </div>
-      <button class="button button-block button-positive icon-left ion-log-in" ng-click="toggleLeftSideMenu()">
-        Login
-      </button>
     </div>
     <div ng-include="'login/login.progress.html'"></div>
     <div ng-if="user.authenticated">
