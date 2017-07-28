@@ -12215,11 +12215,3 @@ a.button {
 
 .canvass-element-table td {
   word-wrap: break-word; }
-
-.ul-style {
-  list-style-type: square; }
-
-.ul-style li {
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 2px; }
