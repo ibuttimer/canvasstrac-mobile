@@ -1,5 +1,8 @@
-﻿<ion-view view-title="Map">
+<ion-view view-title="Map">
   <ion-content>
-    <div id="map" data-tap-disabled="true"></div>
+    <div class="list card" ng-if="!showMap">
+        Map functionality unavailable.
+    </div>
+    <div id="map" data-tap-disabled="true" ng-if="showMap"></div>
   </ion-content>
 </ion-view>

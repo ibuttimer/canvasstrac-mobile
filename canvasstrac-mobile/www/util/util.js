@@ -1,4 +1,4 @@
-﻿/*jslint node: true */
+/*jslint node: true */
 /*global angular */
 'use strict';
 
@@ -27,8 +27,8 @@ function utilFactory() {
 
   /**
    * Extract the error message from a server response
-   * @param {object} response
-   * @returns {string} 
+   * @param {object} response Server response
+   * @returns {string}  error message
    */
   function getErrorMsg(response) {
     var errormessage = '';
