@@ -249,3 +249,6 @@ ModelManifest.xml
 /canvasstrac-mobile/simulation
 /canvasstrac-mobile/build.json
 /canvasstrac-mobile/.env
+
+# Visual Studio Code
+.vscode/
