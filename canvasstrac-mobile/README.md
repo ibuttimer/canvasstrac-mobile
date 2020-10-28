@@ -21,11 +21,13 @@ To learn more about Tools for Apache Cordova, visit this [link](https://taco.vis
 
 With VS Code:
 * Clone this repository (https://github.com/ibuttimer/canvasstrac-mobile).
+* cd canvasstrac-mobile
+* git submodule init
+* git submodule update
 * Run `npm install` from the project root.
-* Run `bower install` from the project root.
-* Add android / iOS / windows platform to your project by running `ionic platform add <platform name>` in a terminal from your project root.
-* Build the project by running gulp tsc and then `ionic build <platform name>`
-* Deploy to device or emulator by running `ionic run <platform name>` or `ionic emulate <platform name>`
+* Add android / iOS / windows platform to your project by running `cordova platform add <platform name>` in a terminal from your project root.
+* Build the project by running gulp tsc and then `cordova build <platform name>`
+* Deploy to device or emulator by running `cordova run <platform name>` or `ionic emulate <platform name>`
 * Success
 
 ** Note: To improve your Cordova development workflow, install [VS Code Cordova extension](https://marketplace.visualstudio.com/items?itemName=vsmobile.cordova-tools). 

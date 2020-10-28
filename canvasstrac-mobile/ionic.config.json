@@ -1,10 +1,14 @@
 {
   "name": "ie.ianbuttimer.canvasstrac",
-  "app_id": "",
-  "gulpDependantTasks" : [
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular",
+  "gulpDependantTasks": [
     "sass"
-  ],  
-   "gulpStartupTasks": [        
-    "sass", "watch"
+  ],
+  "gulpStartupTasks": [
+    "sass",
+    "watch"
   ]
 }
