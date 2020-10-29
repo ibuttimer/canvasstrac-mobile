@@ -1,7 +1,7 @@
 ﻿/*jslint node: true */
 'use strict';
 
-angular.module('canvassTrac', ['ionic', 'ct.config', 'ct.clientCommon', 'ngCordova', 'chart.js'])
+angular.module('canvassTrac', ['ionic', 'ct.config', 'ct.clientCommon', 'ionic.native', 'chart.js'])
 
   .config(function ($stateProvider, $urlRouterProvider, STATES) {
 

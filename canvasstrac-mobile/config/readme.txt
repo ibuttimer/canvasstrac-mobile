@@ -1,9 +1,6 @@
 ﻿The environment variable replacement functionality is based on a post by Jeff French, available at http://geekindulgence.com/environment-variables-in-angularjs-and-ionic/
 
-There is a gulp task 'replace' which reads the contents of a json config file from this folder and 
-creates version of app.config.js in the www folder.
-
-There is a gulp task 'replace' which reads the contents of the json config file from this folder and creates an env.json in the app folder. If the env.json file doesn't exist in the app folder, the variables are read from the environment.
+There is a gulp task 'replace' which reads the contents of a json config file and creates version of app.config.js in the www folder. If the env.json file doesn't exist in the app folder, the variables are read from the environment.
 
 WARNING: nice idea but need to investigate further as regards passing the '--env localdev' argument to gulp from the Visual studio build.
 
@@ -22,7 +19,9 @@ The json config file should have the following format
   "disableAuth": <<true to disable authentication, false otherwise>>,
 
   // server-specific settings
-  "dbAddr": "<<MongoDB URI, e.g. localhost:27017/canvassTrac>>",
+  // Note: make sure to use the uri which corresponds to the MongoDB Driver version used
+  "dbAddr": "<<MongoDB URI of the form username:password@host:port/database, e.g. localhost:27017/canvassTrac>>",
+  "dbVersion": "<<MongoDB version, e.g. 3.6.x>>",
 
   "mgmtPath": "<<path (relative to app.js) of management console files to serve>>",
 
@@ -41,13 +40,14 @@ The json config file should have the following format
   "testOptions": "<<test options, see config.js for details>>"
 
   // sparkpost options
-  "SPARKPOST_API_KEY": "<<The API key for the SparkPost API>>",
-  "SPARKPOST_API_URL": "<<The base URI for the SparkPost API>>",
-  "SPARKPOST_SANDBOX_DOMAIN": "<<Sandbox domain>>",
-  "SPARKPOST_SMTP_HOST": "<<SMTP Host>>",
-  "SPARKPOST_SMTP_PASSWORD": "<<SMTP Password>>",
-  "SPARKPOST_SMTP_PORT": "<<SMTP Port>>",
-  "SPARKPOST_SMTP_USERNAME": "<<SMTP Username>>"
+  // Heroku SparkPost add-on shutdown 15/10/2020, disable email for the moment
+  // "SPARKPOST_API_KEY": "<<The API key for the SparkPost API>>",
+  // "SPARKPOST_API_URL": "<<The base URI for the SparkPost API>>",
+  // "SPARKPOST_SANDBOX_DOMAIN": "<<Sandbox domain>>",
+  // "SPARKPOST_SMTP_HOST": "<<SMTP Host>>",
+  // "SPARKPOST_SMTP_PASSWORD": "<<SMTP Password>>",
+  // "SPARKPOST_SMTP_PORT": "<<SMTP Port>>",
+  // "SPARKPOST_SMTP_USERNAME": "<<SMTP Username>>"
 
   // management app settings
   "mapsApiKey": "<<Google Maps API key>>",
@@ -73,6 +73,7 @@ The json config file should have the following format
 
   // see dbgFlags.txt for list of debug flag names
   // values are true to enable debug output, false otherwise
+
 
 }
 
