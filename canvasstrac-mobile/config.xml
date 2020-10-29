@@ -86,12 +86,10 @@
         <icon height="71" src="resources/windows/icon/logo71x71.scale-100.png" width="71" />
         <icon height="150" src="resources/windows/icon/wide310x150.scale-100.png" width="310" />
     </platform>
-    <engine name="android" spec="^9.0.0" />
     <engine name="ios" spec="6.1.1" />
     <engine name="windows" spec="7.0.1" />
     <plugin name="com.lampa.startapp" spec="0.1.4" />
     <plugin name="cordova-plugin-app-version" spec="0.1.9" />
-    <plugin name="cordova-plugin-compat" spec="1.2.0" />
     <plugin name="cordova-plugin-console" spec="~1.1.0" />
     <plugin name="cordova-plugin-device" spec="~2.0.3" />
     <plugin name="cordova-plugin-geolocation" spec="4.0.2" />

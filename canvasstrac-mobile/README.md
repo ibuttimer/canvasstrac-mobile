@@ -15,7 +15,6 @@ To learn more about Tools for Apache Cordova, visit this [link](https://taco.vis
 2. Cordova and Ionic - npm install cordova ionic
 3. TypeScript - npm install typescript
 4. Gulp - npm install gulp
-5. Bower - npm install bower
 
 ## Getting Started
 
