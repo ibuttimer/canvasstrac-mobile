@@ -46,7 +46,7 @@
     "gulp-replace-task": "^0.11.0",
     "gulp-sass": "^4.1.0",
     "gulp-util": "^3.0.8",
-    "shelljs": "^0.8.4",
+    "shelljs": "^0.8.5",
     "yargs": "^16.0.3"
   },
   "scripts": {
