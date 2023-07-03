@@ -1,6 +1,8 @@
 # canvasstrac-mobile
 Mobile client application for CanvassTrac suite
 
+> **This repository is archived and no longer maintained.**
+
 ## Development Environment
 The development environment:
 * Visual Studio Code
